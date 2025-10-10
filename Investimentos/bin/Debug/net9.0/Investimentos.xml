@@ -1,0 +1,218 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Investimentos</name>
+    </assembly>
+    <members>
+        <member name="T:ProjetoInvestimentos.Controllers.InvestimentosController">
+            <summary>
+            Controller para gerenciamento de investimentos
+            </summary>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetAll">
+            <summary>
+            Obtém todos os investimentos
+            </summary>
+            <returns>Lista de todos os investimentos ordenados por data de criação</returns>
+            <response code="200">Retorna a lista de investimentos</response>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetById(System.Guid)">
+            <summary>
+            Obtém um investimento específico pelo ID
+            </summary>
+            <param name="id">ID único do investimento</param>
+            <returns>Dados do investimento</returns>
+            <response code="200">Investimento encontrado</response>
+            <response code="404">Investimento não encontrado</response>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetByUserCpf(System.String)">
+            <summary>
+            Obtém todos os investimentos de um usuário específico
+            </summary>
+            <param name="userCpf">CPF do usuário (somente números)</param>
+            <returns>Lista de investimentos do usuário</returns>
+            <response code="200">Lista de investimentos do usuário</response>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.Create(ProjetoInvestimentos.Models.Investimento)">
+            <summary>
+            Cria um novo investimento
+            </summary>
+            <param name="investimento">Dados do investimento a ser criado</param>
+            <returns>Investimento criado com ID gerado</returns>
+            <response code="201">Investimento criado com sucesso</response>
+            <response code="400">Dados inválidos</response>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.Update(System.Guid,ProjetoInvestimentos.Models.Investimento)">
+            <summary>
+            Atualiza um investimento existente
+            </summary>
+            <param name="id">ID do investimento a ser atualizado</param>
+            <param name="investimento">Novos dados do investimento</param>
+            <returns>Investimento atualizado</returns>
+            <response code="200">Investimento atualizado com sucesso</response>
+            <response code="400">ID não confere ou dados inválidos</response>
+            <response code="404">Investimento não encontrado</response>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.Delete(System.Guid)">
+            <summary>
+            Remove um investimento
+            </summary>
+            <param name="id">ID do investimento a ser removido</param>
+            <returns>Confirmação de remoção</returns>
+            <response code="204">Investimento removido com sucesso</response>
+            <response code="404">Investimento não encontrado</response>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetByTipo(System.String)">
+            <summary>
+            Filtra investimentos por tipo
+            </summary>
+            <param name="tipo">Tipo de investimento (ex: Ação, CDB, Tesouro)</param>
+            <returns>Lista de investimentos do tipo especificado</returns>
+            <response code="200">Lista de investimentos filtrada por tipo</response>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetByOperacao(System.String)">
+            <summary>
+            Filtra investimentos por operação
+            </summary>
+            <param name="operacao">Tipo de operação (compra ou venda)</param>
+            <returns>Lista de investimentos da operação especificada</returns>
+            <response code="200">Lista de investimentos filtrada por operação</response>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetTotalValueByUser(System.String)">
+            <summary>
+            Calcula o valor total investido por um usuário
+            </summary>
+            <param name="userCpf">CPF do usuário</param>
+            <returns>Valor total considerando compras (+) e vendas (-)</returns>
+            <response code="200">Valor total calculado</response>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetRecentInvestments(System.Int32)">
+            <summary>
+            Obtém investimentos recentes
+            </summary>
+            <param name="days">Número de dias para considerar como recente (padrão: 30)</param>
+            <returns>Lista de investimentos dos últimos N dias</returns>
+            <response code="200">Investimentos recentes</response>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetInvestmentSummaryByType">
+            <summary>
+            Obtém resumo de investimentos agrupados por tipo
+            </summary>
+            <returns>Estatísticas agrupadas por tipo de investimento</returns>
+            <response code="200">Resumo estatístico por tipo</response>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetAllUserCpfs">
+            <summary>
+            Lista todos os CPFs únicos presentes na base de dados
+            </summary>
+            <returns>Lista de CPFs únicos ordenados</returns>
+            <response code="200">Lista de CPFs únicos</response>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetAssetPrice(System.String)">
+            <summary>
+            Obtém cotação de um ativo financeiro
+            </summary>
+            <param name="symbol">Símbolo do ativo (ex: AAPL, GOOGL, PETR4)</param>
+            <returns>Dados de cotação do ativo</returns>
+            <response code="200">Cotação obtida com sucesso</response>
+            <response code="500">Erro ao consultar API externa</response>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetAddressByCep(System.String)">
+            <summary>
+            Consulta dados de endereço por CEP
+            </summary>
+            <param name="cep">CEP no formato 12345678 ou 12345-678</param>
+            <returns>Dados completos do endereço</returns>
+            <response code="200">Endereço encontrado</response>
+            <response code="500">Erro ao consultar CEP</response>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetBitcoinPrice">
+            <summary>
+            Obtém preço atual do Bitcoin
+            </summary>
+            <returns>Preço do Bitcoin em BRL e USD</returns>
+            <response code="200">Preço obtido com sucesso</response>
+            <response code="500">Erro ao consultar preço</response>
+        </member>
+        <member name="T:ProjetoInvestimentos.Models.Investimento">
+            <summary>
+            Modelo de dados para investimentos
+            </summary>
+        </member>
+        <member name="P:ProjetoInvestimentos.Models.Investimento.Id">
+            <summary>
+            Identificador único do investimento
+            </summary>
+        </member>
+        <member name="P:ProjetoInvestimentos.Models.Investimento.UserCpf">
+            <summary>
+            CPF do usuário proprietário do investimento
+            </summary>
+        </member>
+        <member name="P:ProjetoInvestimentos.Models.Investimento.UserId">
+            <summary>
+            ID do usuário (referência interna)
+            </summary>
+        </member>
+        <member name="P:ProjetoInvestimentos.Models.Investimento.Tipo">
+            <summary>
+            Tipo do investimento
+            </summary>
+        </member>
+        <member name="P:ProjetoInvestimentos.Models.Investimento.Codigo">
+            <summary>
+            Código do ativo investido
+            </summary>
+        </member>
+        <member name="P:ProjetoInvestimentos.Models.Investimento.Valor">
+            <summary>
+            Valor monetário do investimento
+            </summary>
+        </member>
+        <member name="P:ProjetoInvestimentos.Models.Investimento.Operacao">
+            <summary>
+            Tipo de operação realizada
+            </summary>
+        </member>
+        <member name="P:ProjetoInvestimentos.Models.Investimento.CriadoEm">
+            <summary>
+            Data e hora de criação do registro
+            </summary>
+        </member>
+        <member name="P:ProjetoInvestimentos.Models.Investimento.AlteradoEm">
+            <summary>
+            Data e hora da última alteração
+            </summary>
+        </member>
+        <member name="T:ProjetoInvestimentos.Models.UserProfile">
+            <summary>
+            Modelo para perfis de usuário
+            </summary>
+        </member>
+        <member name="P:ProjetoInvestimentos.Models.UserProfile.Id">
+            <summary>
+            ID único do usuário
+            </summary>
+        </member>
+        <member name="P:ProjetoInvestimentos.Models.UserProfile.Cpf">
+            <summary>
+            CPF do usuário
+            </summary>
+        </member>
+        <member name="P:ProjetoInvestimentos.Models.UserProfile.Nome">
+            <summary>
+            Nome do usuário
+            </summary>
+        </member>
+        <member name="P:ProjetoInvestimentos.Models.UserProfile.CreatedAt">
+            <summary>
+            Data de criação
+            </summary>
+        </member>
+        <member name="T:ProjetoInvestimentos.Swagger.SwaggerExamplesFilter">
+            <summary>
+            Provedor de exemplos para documentação Swagger
+            </summary>
+        </member>
+    </members>
+</doc>
