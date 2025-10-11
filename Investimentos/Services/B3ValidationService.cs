@@ -168,18 +168,41 @@ public class B3ValidationService : IB3ValidationService
     {
         _b3Codes.Clear();
         
-        // Lista básica das principais ações da B3 (caso o CSV não seja encontrado)
+        // Lista curada das principais ações da B3 que FUNCIONAM nas APIs
         var basicCodes = new[]
         {
-            "PETR3", "PETR4", "VALE3", "ITUB4", "BBDC3", "BBDC4", "ABEV3", "B3SA3", 
-            "BBAS3", "MGLU3", "WEGE3", "RAIL3", "RENT3", "CSAN3", "ASAI3", "COGN3",
-            "AZUL4", "ITSA4", "CSNA3", "VAMO3", "CVCB3", "PCAR3", "BRAV3", "LREN3",
-            "DIRR3", "CPLE6", "MRVE3", "MBRF3", "HAPV3", "VBBR3", "USIM5", "MOTV3",
-            "PRIO3", "GGBR4", "TIMS3", "UGPA3", "BEEF3", "POMO4", "BPAC11", "NATU3",
-            "CMIN3", "CMIG4", "BRKM5", "ALPA4", "ENEV3", "AURE3", "SUZB3", "ELET3",
-            "ELET6", "EMBR3", "KLBN11", "GOAU4", "SBSP3", "TAEE11", "VIVT3", "RADL3",
-            "NTCO3", "MRFG3", "JBSS3", "BRAP4", "CPFE3", "ELET4", "MULT3", "QUAL3",
-            "IRBR3", "SANB11", "TOTS3", "LWSA3", "MDIA3", "EVEN3", "CYRE3", "JHSF3"
+            // Principais bancos
+            "ITUB4", "BBDC4", "BBAS3", "SANB11", "BPAC11",
+            
+            // Petróleo e energia
+            "PETR3", "PETR4", "VALE3", "PRIO3", "CSAN3",
+            
+            // Varejo e consumo
+            "MGLU3", "LREN3", "ABEV3", "ASAI3", "PCAR3",
+            
+            // Tecnologia e serviços
+            "B3SA3", "TOTS3", "LWSA3",
+            
+            // Industrial
+            "WEGE3", "RAIL3", "RENT3", "SUZB3", "KLBN11",
+            
+            // Construção e imobiliário
+            "MRVE3", "CYRE3", "MULT3",
+            
+            // Siderurgia e mineração
+            "CSNA3", "GGBR4", "USIM5", "GOAU4",
+            
+            // Utilities
+            "ELET3", "ELET6", "CMIG4", "SBSP3", "TAEE11",
+            
+            // Saúde e educação
+            "HAPV3", "QUAL3", "COGN3", "YDUQ3",
+            
+            // Alimentos
+            "JBSS3", "MRFG3", "BEEF3", "MDIA3",
+            
+            // Outros importantes
+            "VIVT3", "RADL3", "NTCO3", "EMBR3", "AZUL4"
         };
 
         foreach (var code in basicCodes)

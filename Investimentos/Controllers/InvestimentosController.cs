@@ -408,7 +408,7 @@ public class InvestimentosController : ControllerBase
     [HttpGet("cotacao-br/{codigo}")]
     [SwaggerOperation(
         Summary = "Consulta cotação de ação brasileira",
-        Description = "Conecta com APIs brasileiras (HG Finance e Brapi.dev) para obter cotação em tempo real de ações da B3"
+        Description = "Conecta com APIs brasileiras confiáveis (Brapi.dev e Yahoo Finance) para obter cotação em tempo real de ações da B3"
     )]
     [SwaggerResponse(200, "Cotação obtida com sucesso", typeof(object))]
     [SwaggerResponse(404, "Ação não encontrada")]
@@ -421,36 +421,7 @@ public class InvestimentosController : ControllerBase
             // Normalizar código (remover .SA se existir, converter para maiúsculo)
             codigo = codigo.Replace(".SA", "").ToUpper();
             
-            // Primeira tentativa: HG Finance API (gratuita)
-            try
-            {
-                var hgUrl = $"https://api.hgbrasil.com/finance/stock_price?key=SUA_CHAVE_AQUI&symbol={codigo}";
-                var hgResponse = await _httpClient.GetAsync(hgUrl);
-                
-                if (hgResponse.IsSuccessStatusCode)
-                {
-                    var hgContent = await hgResponse.Content.ReadAsStringAsync();
-                    var hgData = JsonSerializer.Deserialize<JsonElement>(hgContent);
-                    
-                    if (hgData.TryGetProperty("results", out var results) && 
-                        results.TryGetProperty(codigo, out var stockData))
-                    {
-                        return Ok(new
-                        {
-                            Codigo = codigo,
-                            Fonte = "HG Finance",
-                            Dados = stockData,
-                            ConsultadoEm = DateTime.UtcNow
-                        });
-                    }
-                }
-            }
-            catch
-            {
-                // Continua para próxima API se HG falhar
-            }
-            
-            // Segunda tentativa: Brapi.dev (gratuita)
+            // Primeira tentativa: Brapi.dev (API brasileira confiável)
             try
             {
                 var brapiUrl = $"https://brapi.dev/api/quote/{codigo}";
@@ -476,14 +447,18 @@ public class InvestimentosController : ControllerBase
             }
             catch
             {
-                // Continua para próxima API se Brapi falhar
+                // Continua para Yahoo Finance se Brapi falhar
             }
             
-            // Terceira tentativa: Yahoo Finance com sufixo .SA
+            // Segunda tentativa: Yahoo Finance com sufixo .SA
             try
             {
                 var yahooSymbol = $"{codigo}.SA";
                 var yahooUrl = $"https://query1.finance.yahoo.com/v8/finance/chart/{yahooSymbol}";
+                
+                _httpClient.DefaultRequestHeaders.Clear();
+                _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
+                
                 var yahooResponse = await _httpClient.GetAsync(yahooUrl);
                 
                 if (yahooResponse.IsSuccessStatusCode)
@@ -508,14 +483,16 @@ public class InvestimentosController : ControllerBase
             }
             catch
             {
-                // Se todas as APIs falharem
+                // Se ambas as APIs falharem
             }
             
             return NotFound(new
             {
                 Erro = "Ação não encontrada",
                 Codigo = codigo,
-                Mensagem = "Não foi possível encontrar dados para este código de ação em nenhuma das APIs consultadas"
+                Mensagem = "Não foi possível encontrar dados para este código de ação. Verifique se o código está correto e se a ação está listada na B3.",
+                APIsConsultadas = new[] { "Brapi.dev", "Yahoo Finance" },
+                Sugestao = "Tente códigos como: PETR4, VALE3, ITUB4, BBAS3, BBDC4, MGLU3"
             });
         }
         catch (Exception ex)
