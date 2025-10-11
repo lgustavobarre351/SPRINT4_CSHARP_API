@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ProjetoInvestimentos.Models;
 using ProjetoInvestimentos.Repositories;
+using ProjetoInvestimentos.Services;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
@@ -17,11 +18,13 @@ public class InvestimentosController : ControllerBase
 {
     private readonly IInvestimentoRepository _repository;
     private readonly HttpClient _httpClient;
+    private readonly IB3ValidationService _b3ValidationService;
 
-    public InvestimentosController(IInvestimentoRepository repository, HttpClient httpClient)
+    public InvestimentosController(IInvestimentoRepository repository, HttpClient httpClient, IB3ValidationService b3ValidationService)
     {
         _repository = repository;
         _httpClient = httpClient;
+        _b3ValidationService = b3ValidationService;
     }
 
     // CRUD completo (35%)
@@ -279,51 +282,73 @@ public class InvestimentosController : ControllerBase
         return Ok(cpfs);
     }
 
-    // Endpoints conectando com outras APIs (20%)
+    // APIs para ações brasileiras e outros serviços
     
     /// <summary>
-    /// Obtém cotação de um ativo financeiro
+    /// Lista todos os códigos de ações da B3 carregados do CSV
     /// </summary>
-    /// <param name="symbol">Símbolo do ativo (ex: AAPL, GOOGL, PETR4)</param>
-    /// <returns>Dados de cotação do ativo</returns>
-    /// <response code="200">Cotação obtida com sucesso</response>
-    /// <response code="500">Erro ao consultar API externa</response>
-    [HttpGet("cotacao/{symbol}")]
+    /// <returns>Lista de todos os códigos válidos da B3</returns>
+    /// <response code="200">Lista de códigos da B3</response>
+    [HttpGet("codigos-b3")]
     [SwaggerOperation(
-        Summary = "Consulta cotação de ativo",
-        Description = "Conecta com a API Alpha Vantage para obter cotação em tempo real de ações e outros ativos financeiros"
+        Summary = "Lista códigos de ações da B3",
+        Description = "Retorna todos os códigos de ações da B3 carregados do arquivo CSV, útil para validação e consulta"
     )]
-    [SwaggerResponse(200, "Cotação obtida com sucesso", typeof(object))]
-    [SwaggerResponse(500, "Erro ao consultar API externa")]
-    public async Task<ActionResult<object>> GetAssetPrice(
-        [FromRoute, SwaggerParameter("Símbolo do ativo (AAPL, GOOGL, PETR4, etc.)", Required = true)] string symbol)
+    [SwaggerResponse(200, "Lista de códigos da B3", typeof(object))]
+    public async Task<ActionResult<object>> GetB3Codes()
     {
         try
         {
-            // Usando API gratuita da Alpha Vantage com chave real
-            var apiKey = "21H1KB6IUY6IL40N"; // Chave real da Alpha Vantage
-            var url = $"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={symbol}&apikey={apiKey}";
-            
-            var response = await _httpClient.GetAsync(url);
-            
-            if (!response.IsSuccessStatusCode)
-            {
-                return StatusCode((int)response.StatusCode, "Erro ao consultar API externa");
-            }
-
-            var content = await response.Content.ReadAsStringAsync();
-            var data = JsonSerializer.Deserialize<JsonElement>(content);
-
+            var codes = await _b3ValidationService.GetAllB3CodesAsync();
             return Ok(new
             {
-                Symbol = symbol,
-                Data = data,
-                ConsultadoEm = DateTime.UtcNow
+                TotalCodigos = codes.Count,
+                Codigos = codes.OrderBy(c => c).ToList(),
+                CarregadoEm = DateTime.UtcNow
             });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $"Erro interno: {ex.Message}");
+            return StatusCode(500, new
+            {
+                Erro = "Erro ao obter códigos B3",
+                Mensagem = ex.Message
+            });
+        }
+    }
+
+    /// <summary>
+    /// Recarrega a lista de códigos da B3 do arquivo CSV
+    /// </summary>
+    /// <returns>Confirmação de recarregamento</returns>
+    /// <response code="200">Lista recarregada com sucesso</response>
+    [HttpPost("recarregar-b3")]
+    [SwaggerOperation(
+        Summary = "Recarrega códigos da B3",
+        Description = "Força o recarregamento da lista de códigos da B3 a partir do arquivo CSV"
+    )]
+    [SwaggerResponse(200, "Lista recarregada com sucesso", typeof(object))]
+    public async Task<ActionResult<object>> ReloadB3Codes()
+    {
+        try
+        {
+            await _b3ValidationService.ReloadAsync();
+            var codes = await _b3ValidationService.GetAllB3CodesAsync();
+            
+            return Ok(new
+            {
+                Mensagem = "Lista de códigos B3 recarregada com sucesso",
+                TotalCodigos = codes.Count,
+                RecarregadoEm = DateTime.UtcNow
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                Erro = "Erro ao recarregar códigos B3",
+                Mensagem = ex.Message
+            });
         }
     }
 
@@ -369,6 +394,138 @@ public class InvestimentosController : ControllerBase
         catch (Exception ex)
         {
             return StatusCode(500, $"Erro interno: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Obtém cotação de ação brasileira (B3)
+    /// </summary>
+    /// <param name="codigo">Código da ação brasileira (ex: PETR4, VALE3, ITUB4)</param>
+    /// <returns>Dados de cotação da ação brasileira</returns>
+    /// <response code="200">Cotação obtida com sucesso</response>
+    /// <response code="404">Ação não encontrada</response>
+    /// <response code="500">Erro ao consultar API</response>
+    [HttpGet("cotacao-br/{codigo}")]
+    [SwaggerOperation(
+        Summary = "Consulta cotação de ação brasileira",
+        Description = "Conecta com APIs brasileiras (HG Finance e Brapi.dev) para obter cotação em tempo real de ações da B3"
+    )]
+    [SwaggerResponse(200, "Cotação obtida com sucesso", typeof(object))]
+    [SwaggerResponse(404, "Ação não encontrada")]
+    [SwaggerResponse(500, "Erro ao consultar API")]
+    public async Task<ActionResult<object>> GetBrazilianStockPrice(
+        [FromRoute, SwaggerParameter("Código da ação brasileira (PETR4, VALE3, ITUB4, etc.)", Required = true)] string codigo)
+    {
+        try
+        {
+            // Normalizar código (remover .SA se existir, converter para maiúsculo)
+            codigo = codigo.Replace(".SA", "").ToUpper();
+            
+            // Primeira tentativa: HG Finance API (gratuita)
+            try
+            {
+                var hgUrl = $"https://api.hgbrasil.com/finance/stock_price?key=SUA_CHAVE_AQUI&symbol={codigo}";
+                var hgResponse = await _httpClient.GetAsync(hgUrl);
+                
+                if (hgResponse.IsSuccessStatusCode)
+                {
+                    var hgContent = await hgResponse.Content.ReadAsStringAsync();
+                    var hgData = JsonSerializer.Deserialize<JsonElement>(hgContent);
+                    
+                    if (hgData.TryGetProperty("results", out var results) && 
+                        results.TryGetProperty(codigo, out var stockData))
+                    {
+                        return Ok(new
+                        {
+                            Codigo = codigo,
+                            Fonte = "HG Finance",
+                            Dados = stockData,
+                            ConsultadoEm = DateTime.UtcNow
+                        });
+                    }
+                }
+            }
+            catch
+            {
+                // Continua para próxima API se HG falhar
+            }
+            
+            // Segunda tentativa: Brapi.dev (gratuita)
+            try
+            {
+                var brapiUrl = $"https://brapi.dev/api/quote/{codigo}";
+                var brapiResponse = await _httpClient.GetAsync(brapiUrl);
+                
+                if (brapiResponse.IsSuccessStatusCode)
+                {
+                    var brapiContent = await brapiResponse.Content.ReadAsStringAsync();
+                    var brapiData = JsonSerializer.Deserialize<JsonElement>(brapiContent);
+                    
+                    if (brapiData.TryGetProperty("results", out var results) && 
+                        results.GetArrayLength() > 0)
+                    {
+                        return Ok(new
+                        {
+                            Codigo = codigo,
+                            Fonte = "Brapi.dev",
+                            Dados = results[0],
+                            ConsultadoEm = DateTime.UtcNow
+                        });
+                    }
+                }
+            }
+            catch
+            {
+                // Continua para próxima API se Brapi falhar
+            }
+            
+            // Terceira tentativa: Yahoo Finance com sufixo .SA
+            try
+            {
+                var yahooSymbol = $"{codigo}.SA";
+                var yahooUrl = $"https://query1.finance.yahoo.com/v8/finance/chart/{yahooSymbol}";
+                var yahooResponse = await _httpClient.GetAsync(yahooUrl);
+                
+                if (yahooResponse.IsSuccessStatusCode)
+                {
+                    var yahooContent = await yahooResponse.Content.ReadAsStringAsync();
+                    var yahooData = JsonSerializer.Deserialize<JsonElement>(yahooContent);
+                    
+                    if (yahooData.TryGetProperty("chart", out var chart) &&
+                        chart.TryGetProperty("result", out var result) &&
+                        result.GetArrayLength() > 0)
+                    {
+                        var stockInfo = result[0];
+                        return Ok(new
+                        {
+                            Codigo = codigo,
+                            Fonte = "Yahoo Finance",
+                            Dados = stockInfo,
+                            ConsultadoEm = DateTime.UtcNow
+                        });
+                    }
+                }
+            }
+            catch
+            {
+                // Se todas as APIs falharem
+            }
+            
+            return NotFound(new
+            {
+                Erro = "Ação não encontrada",
+                Codigo = codigo,
+                Mensagem = "Não foi possível encontrar dados para este código de ação em nenhuma das APIs consultadas"
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                Erro = "Erro interno",
+                Mensagem = ex.Message,
+                Codigo = codigo
+            });
         }
     }
 

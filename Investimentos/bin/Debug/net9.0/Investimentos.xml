@@ -108,14 +108,19 @@
             <returns>Lista de CPFs únicos ordenados</returns>
             <response code="200">Lista de CPFs únicos</response>
         </member>
-        <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetAssetPrice(System.String)">
+        <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetB3Codes">
             <summary>
-            Obtém cotação de um ativo financeiro
+            Lista todos os códigos de ações da B3 carregados do CSV
             </summary>
-            <param name="symbol">Símbolo do ativo (ex: AAPL, GOOGL, PETR4)</param>
-            <returns>Dados de cotação do ativo</returns>
-            <response code="200">Cotação obtida com sucesso</response>
-            <response code="500">Erro ao consultar API externa</response>
+            <returns>Lista de todos os códigos válidos da B3</returns>
+            <response code="200">Lista de códigos da B3</response>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.ReloadB3Codes">
+            <summary>
+            Recarrega a lista de códigos da B3 do arquivo CSV
+            </summary>
+            <returns>Confirmação de recarregamento</returns>
+            <response code="200">Lista recarregada com sucesso</response>
         </member>
         <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetAddressByCep(System.String)">
             <summary>
@@ -125,6 +130,16 @@
             <returns>Dados completos do endereço</returns>
             <response code="200">Endereço encontrado</response>
             <response code="500">Erro ao consultar CEP</response>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetBrazilianStockPrice(System.String)">
+            <summary>
+            Obtém cotação de ação brasileira (B3)
+            </summary>
+            <param name="codigo">Código da ação brasileira (ex: PETR4, VALE3, ITUB4)</param>
+            <returns>Dados de cotação da ação brasileira</returns>
+            <response code="200">Cotação obtida com sucesso</response>
+            <response code="404">Ação não encontrada</response>
+            <response code="500">Erro ao consultar API</response>
         </member>
         <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetBitcoinPrice">
             <summary>
@@ -207,6 +222,11 @@
         <member name="P:ProjetoInvestimentos.Models.UserProfile.CreatedAt">
             <summary>
             Data de criação
+            </summary>
+        </member>
+        <member name="T:ProjetoInvestimentos.Services.IB3ValidationService">
+            <summary>
+            Serviço para validar códigos de ações da B3 usando CSV
             </summary>
         </member>
         <member name="T:ProjetoInvestimentos.Swagger.SwaggerExamplesFilter">

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ProjetoInvestimentos.Data;
 using ProjetoInvestimentos.Repositories;
+using ProjetoInvestimentos.Services;
 using ProjetoInvestimentos.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -50,6 +51,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // --- Repository ---
 builder.Services.AddScoped<IInvestimentoRepository, EfInvestimentoRepository>();
+
+// --- Serviços ---
+builder.Services.AddSingleton<IB3ValidationService, B3ValidationService>();
 
 // --- HttpClient para APIs externas ---
 builder.Services.AddHttpClient();

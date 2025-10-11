@@ -227,3 +227,4 @@ C:\Users\luisg\Desktop\SPRINT4\SPRINT4_CSHARP_API\investimentos\obj\Debug\net9.0
 C:\Users\luisg\Desktop\SPRINT4\SPRINT4_CSHARP_API\investimentos\obj\Debug\net9.0\Investimentos.pdb
 C:\Users\luisg\Desktop\SPRINT4\SPRINT4_CSHARP_API\investimentos\obj\Debug\net9.0\Investimentos.genruntimeconfig.cache
 C:\Users\luisg\Desktop\SPRINT4\SPRINT4_CSHARP_API\investimentos\obj\Debug\net9.0\ref\Investimentos.dll
+C:\Users\luisg\Desktop\SPRINT4\SPRINT4_CSHARP_API\Investimentos\obj\Debug\net9.0\Investimentos.sourcelink.json
