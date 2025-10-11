@@ -96,4 +96,6 @@ app.MapControllers();
 // --- Redirecionamento para Swagger ---
 app.MapGet("/", () => Results.Redirect("/swagger"));
 
-app.Run("http://localhost:5171");
+// Configuração de porta para produção
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+app.Run($"http://0.0.0.0:{port}");

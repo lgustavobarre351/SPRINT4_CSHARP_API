@@ -1,4 +1,4 @@
-# Dockerfile para Render - versão debug específica
+# Dockerfile para Render - contexto na pasta pai
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
@@ -9,12 +9,13 @@ RUN ls -la
 RUN echo "=== Procurando arquivo .csproj ==="
 RUN find . -name "*.csproj" -type f
 
-# Restore e build
-RUN dotnet restore ./Investimentos.csproj
-RUN dotnet build ./Investimentos.csproj -c Release -o /app/build
+# Restore e build (arquivo está dentro da pasta Investimentos)
+WORKDIR /src/Investimentos
+RUN dotnet restore Investimentos.csproj
+RUN dotnet build Investimentos.csproj -c Release -o /app/build
 
 # Publish
-RUN dotnet publish ./Investimentos.csproj -c Release -o /app/publish
+RUN dotnet publish Investimentos.csproj -c Release -o /app/publish
 
 # Final stage - runtime
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
