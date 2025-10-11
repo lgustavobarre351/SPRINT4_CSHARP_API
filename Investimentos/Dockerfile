@@ -1,29 +1,30 @@
-# Use the official .NET 9.0 runtime as the base image
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
-WORKDIR /app
-EXPOSE 8080
-
-# Use the official .NET 9.0 SDK for building
+# Dockerfile para Render - versão debug específica
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-# Copy csproj and restore dependencies
-COPY Investimentos.csproj ./
-RUN dotnet restore Investimentos.csproj
+# Debug: listar arquivos
+RUN echo "=== Listando arquivos do contexto ==="
+COPY . .
+RUN ls -la
+RUN echo "=== Procurando arquivo .csproj ==="
+RUN find . -name "*.csproj" -type f
 
-# Copy everything else and build
-COPY . ./
-RUN dotnet build Investimentos.csproj -c Release -o /app/build
+# Restore e build
+RUN dotnet restore ./Investimentos.csproj
+RUN dotnet build ./Investimentos.csproj -c Release -o /app/build
 
-FROM build AS publish
-RUN dotnet publish Investimentos.csproj -c Release -o /app/publish
+# Publish
+RUN dotnet publish ./Investimentos.csproj -c Release -o /app/publish
 
-FROM base AS final
+# Final stage - runtime
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /app/publish .
 
-# Configure for Render deployment
+# Configure environment
 ENV ASPNETCORE_URLS=http://0.0.0.0:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
+EXPOSE 8080
 ENTRYPOINT ["dotnet", "Investimentos.dll"]
