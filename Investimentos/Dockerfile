@@ -6,14 +6,17 @@ EXPOSE 8080
 # Use the official .NET 9.0 SDK for building
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
-COPY ["Investimentos.csproj", "."]
-RUN dotnet restore "Investimentos.csproj"
-COPY . .
-WORKDIR "/src"
-RUN dotnet build "Investimentos.csproj" -c Release -o /app/build
+
+# Copy csproj and restore dependencies
+COPY Investimentos.csproj ./
+RUN dotnet restore Investimentos.csproj
+
+# Copy everything else and build
+COPY . ./
+RUN dotnet build Investimentos.csproj -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "Investimentos.csproj" -c Release -o /app/publish
+RUN dotnet publish Investimentos.csproj -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
