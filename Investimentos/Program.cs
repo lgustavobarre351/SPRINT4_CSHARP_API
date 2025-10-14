@@ -72,22 +72,20 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // --- Middleware Pipeline ---
-if (app.Environment.IsDevelopment())
+// Swagger habilitado também em produção para demonstração
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Investimentos API v1");
-        c.RoutePrefix = "swagger";
-        c.DocumentTitle = "Investimentos API - Documentação";
-        c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List);
-        c.DefaultModelsExpandDepth(-1);
-        c.DisplayRequestDuration();
-        c.EnableDeepLinking();
-        c.EnableFilter();
-        c.EnableValidator();
-    });
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Investimentos API v1");
+    c.RoutePrefix = "swagger";
+    c.DocumentTitle = "Investimentos API - Documentação";
+    c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List);
+    c.DefaultModelsExpandDepth(-1);
+    c.DisplayRequestDuration();
+    c.EnableDeepLinking();
+    c.EnableFilter();
+    c.EnableValidator();
+});
 
 app.UseCors();
 app.UseRouting();
