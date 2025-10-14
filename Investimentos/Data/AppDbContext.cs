@@ -20,10 +20,10 @@ public class AppDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.UserId).HasColumnName("user_id");
-            entity.Property(e => e.Tipo).HasColumnName("tipo").HasMaxLength(50);
-            entity.Property(e => e.Codigo).HasColumnName("codigo").HasMaxLength(20);
-            entity.Property(e => e.Valor).HasColumnName("valor").HasColumnType("decimal(18,2)");
-            entity.Property(e => e.Operacao).HasColumnName("operacao").HasMaxLength(20);
+            entity.Property(e => e.Tipo).HasColumnName("tipo");
+            entity.Property(e => e.Codigo).HasColumnName("codigo");
+            entity.Property(e => e.Valor).HasColumnName("valor").HasColumnType("numeric(12,2)");
+            entity.Property(e => e.Operacao).HasColumnName("operacao");
             entity.Property(e => e.CriadoEm).HasColumnName("criado_em");
             entity.Property(e => e.AlteradoEm).HasColumnName("alterado_em");
             
@@ -36,9 +36,14 @@ public class AppDbContext : DbContext
             entity.ToTable("user_profiles", "public");
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Cpf).HasColumnName("cpf").HasMaxLength(11);
-            entity.Property(e => e.Nome).HasColumnName("nome");
-            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.Email).HasColumnName("email");
+            entity.Property(e => e.Cpf).HasColumnName("cpf");
+            entity.Property(e => e.Dados).HasColumnName("dados").HasColumnType("jsonb");
+            entity.Property(e => e.CriadoEm).HasColumnName("criado_em");
+            entity.Property(e => e.AlteradoEm).HasColumnName("alterado_em");
+            
+            // Nome não é mapeado para coluna - é usado apenas para lógica de negócio
+            entity.Ignore(e => e.Nome);
         });
 
         base.OnModelCreating(modelBuilder);

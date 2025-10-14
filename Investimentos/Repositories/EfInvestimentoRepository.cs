@@ -77,16 +77,29 @@ public class EfInvestimentoRepository : IInvestimentoRepository
         investimento.CriadoEm = DateTime.UtcNow;
         investimento.AlteradoEm = DateTime.UtcNow;
 
-        // Se UserCpf foi fornecido, buscar o UserId correspondente
+        // Se UserCpf foi fornecido, buscar ou criar o usuário
         if (!string.IsNullOrEmpty(investimento.UserCpf))
         {
             var user = await _context.UserProfiles
                 .FirstOrDefaultAsync(u => u.Cpf == investimento.UserCpf);
             
-            if (user != null)
+            if (user == null)
             {
-                investimento.UserId = user.Id;
+                // Criar usuário automaticamente se não existir
+                user = new UserProfile
+                {
+                    Id = Guid.NewGuid(),
+                    Cpf = investimento.UserCpf,
+                    Nome = null, // Nome pode ser definido posteriormente
+                    CriadoEm = DateTime.UtcNow,
+                    AlteradoEm = DateTime.UtcNow
+                };
+                
+                _context.UserProfiles.Add(user);
+                await _context.SaveChangesAsync();
             }
+            
+            investimento.UserId = user.Id;
         }
 
         _context.Investimentos.Add(investimento);

@@ -45,7 +45,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // --- Entity Framework ---
-string connectionString = "User Id=postgres.oziwendirtmqquvqkree;Password=vqUfvs3b3RgDrEpX;Server=aws-0-us-east-2.pooler.supabase.com;Port=6543;Database=postgres";
+string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+    ?? throw new InvalidOperationException("Connection string not found");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
@@ -97,6 +98,6 @@ app.MapGet("/", () => Results.Redirect("/swagger"));
 
 app.MapControllers();
 
-// --- Configuração de porta para produção ---
-var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
-app.Run($"http://0.0.0.0:{port}");
+// --- Configuração de porta para desenvolvimento local ---
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5171";
+app.Run($"http://localhost:{port}");

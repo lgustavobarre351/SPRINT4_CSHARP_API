@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\luisg\\Desktop\\SPRINT4\\SPRINT4_CSHARP_API\\Investimentos\\Investimentos.csproj": {}
+    "C:\\Users\\luisg\\Desktop\\SPRITN_V2\\SPRINT4_CSHARP_API\\investimentos\\Investimentos.csproj": {}
   },
   "projects": {
-    "C:\\Users\\luisg\\Desktop\\SPRINT4\\SPRINT4_CSHARP_API\\Investimentos\\Investimentos.csproj": {
+    "C:\\Users\\luisg\\Desktop\\SPRITN_V2\\SPRINT4_CSHARP_API\\investimentos\\Investimentos.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\luisg\\Desktop\\SPRINT4\\SPRINT4_CSHARP_API\\Investimentos\\Investimentos.csproj",
+        "projectUniqueName": "C:\\Users\\luisg\\Desktop\\SPRITN_V2\\SPRINT4_CSHARP_API\\investimentos\\Investimentos.csproj",
         "projectName": "Investimentos",
-        "projectPath": "C:\\Users\\luisg\\Desktop\\SPRINT4\\SPRINT4_CSHARP_API\\Investimentos\\Investimentos.csproj",
+        "projectPath": "C:\\Users\\luisg\\Desktop\\SPRITN_V2\\SPRINT4_CSHARP_API\\investimentos\\Investimentos.csproj",
         "packagesPath": "C:\\Users\\luisg\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\luisg\\Desktop\\SPRINT4\\SPRINT4_CSHARP_API\\Investimentos\\obj\\",
+        "outputPath": "C:\\Users\\luisg\\Desktop\\SPRITN_V2\\SPRINT4_CSHARP_API\\investimentos\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -71,6 +71,10 @@
             "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
               "version": "[9.0.2, )"
+            },
+            "Npgsql.EntityFrameworkCore.PostgreSQL.Design": {
+              "target": "Package",
+              "version": "[1.1.0, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",

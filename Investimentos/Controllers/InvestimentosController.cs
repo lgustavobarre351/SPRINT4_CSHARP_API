@@ -9,11 +9,11 @@ using System.Text.Json;
 namespace ProjetoInvestimentos.Controllers;
 
 /// <summary>
-/// Controller para gerenciamento de investimentos
+/// Controller de investimentos
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-[SwaggerTag("Gerenciamento completo de investimentos com CRUD, consultas LINQ e integração com APIs externas")]
+[SwaggerTag("2️⃣ INVESTIMENTOS DA BASE - CRUD completo com consultas LINQ avançadas")]
 public class InvestimentosController : ControllerBase
 {
     private readonly IInvestimentoRepository _repository;
@@ -73,17 +73,17 @@ public class InvestimentosController : ControllerBase
     /// <summary>
     /// Obtém todos os investimentos de um usuário específico
     /// </summary>
-    /// <param name="userCpf">CPF do usuário (somente números)</param>
+    /// <param name="userCpf">CPF do usuário (apenas números, 11 dígitos)</param>
     /// <returns>Lista de investimentos do usuário</returns>
     /// <response code="200">Lista de investimentos do usuário</response>
     [HttpGet("usuario/{userCpf}")]
     [SwaggerOperation(
         Summary = "Lista investimentos por CPF do usuário",
-        Description = "Retorna todos os investimentos associados a um usuário específico identificado pelo CPF"
+        Description = "Retorna todos os investimentos de um usuário. Digite apenas os números do CPF, sem pontos ou traços. Exemplo: 12345678901"
     )]
     [SwaggerResponse(200, "Lista de investimentos do usuário", typeof(IEnumerable<Investimento>))]
     public async Task<ActionResult<IEnumerable<Investimento>>> GetByUserCpf(
-        [FromRoute, SwaggerParameter("CPF do usuário (apenas números)", Required = true)] string userCpf)
+        [FromRoute, SwaggerParameter("CPF do usuário (apenas números, exemplo: 12345678901)", Required = true)] string userCpf)
     {
         var investimentos = await _repository.GetByUserCpfAsync(userCpf);
         return Ok(investimentos);
@@ -99,7 +99,7 @@ public class InvestimentosController : ControllerBase
     [HttpPost]
     [SwaggerOperation(
         Summary = "Cria um novo investimento",
-        Description = "Cadastra um novo investimento no sistema. O ID será gerado automaticamente."
+        Description = "Cadastra um novo investimento. Campo obrigatórios: userCpf (11 números), tipo, codigo, valor, operacao (compra/venda). O ID será gerado automaticamente."
     )]
     [SwaggerResponse(201, "Investimento criado com sucesso", typeof(Investimento))]
     [SwaggerResponse(400, "Dados de entrada inválidos")]
@@ -545,6 +545,92 @@ public class InvestimentosController : ControllerBase
         catch (Exception ex)
         {
             return StatusCode(500, $"Erro interno: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Inicializa o banco com dados de exemplo para testes
+    /// </summary>
+    /// <returns>Confirmação da inicialização</returns>
+    /// <response code="200">Dados de exemplo criados com sucesso</response>
+    [HttpPost("inicializar-dados")]
+    [SwaggerOperation(
+        Summary = "Inicializa dados de exemplo",
+        Description = "Cria usuários e investimentos de exemplo para facilitar os testes da API. Use apenas em ambiente de desenvolvimento."
+    )]
+    [SwaggerResponse(200, "Dados de exemplo criados com sucesso")]
+    public async Task<ActionResult> InicializarDados()
+    {
+        try
+        {
+            // Verificar se já existem dados
+            var existingInvestments = await _repository.GetAllAsync();
+            if (existingInvestments.Any())
+            {
+                return Ok(new { message = "Dados já existem no banco. Use apenas quando o banco estiver vazio." });
+            }
+
+            // Criar investimentos de exemplo (que criarão usuários automaticamente)
+            var investimentosExemplo = new List<Investimento>
+            {
+                new Investimento
+                {
+                    UserCpf = "52604928238",
+                    Tipo = "Ação",
+                    Codigo = "PETR4",
+                    Valor = 1000.50m,
+                    Operacao = "compra"
+                },
+                new Investimento
+                {
+                    UserCpf = "52604928238",
+                    Tipo = "Ação",
+                    Codigo = "VALE3",
+                    Valor = 2500.00m,
+                    Operacao = "compra"
+                },
+                new Investimento
+                {
+                    UserCpf = "52604928238",
+                    Tipo = "CDB",
+                    Codigo = "CDB001",
+                    Valor = 5000.00m,
+                    Operacao = "compra"
+                },
+                new Investimento
+                {
+                    UserCpf = "11122233344",
+                    Tipo = "Tesouro",
+                    Codigo = "TESOURO_SELIC",
+                    Valor = 3000.00m,
+                    Operacao = "compra"
+                },
+                new Investimento
+                {
+                    UserCpf = "11122233344",
+                    Tipo = "Fundo",
+                    Codigo = "FUNDO_XP",
+                    Valor = 1500.00m,
+                    Operacao = "compra"
+                }
+            };
+
+            foreach (var investimento in investimentosExemplo)
+            {
+                await _repository.CreateAsync(investimento);
+            }
+
+            return Ok(new 
+            { 
+                message = "Dados de exemplo criados com sucesso!",
+                usuariosCriados = new[] { "52604928238", "11122233344" },
+                investimentosCriados = investimentosExemplo.Count,
+                instrucoes = "Agora você pode testar todos os endpoints da API usando os CPFs: 52604928238 e 11122233344"
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Erro ao inicializar dados: {ex.Message}");
         }
     }
 }

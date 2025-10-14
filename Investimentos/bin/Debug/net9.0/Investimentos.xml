@@ -4,9 +4,41 @@
         <name>Investimentos</name>
     </assembly>
     <members>
+        <member name="T:ProjetoInvestimentos.Controllers.ApisExternasController">
+            <summary>
+            🌐 APIs EXTERNAS - Integração com B3 e cotações em tempo real
+            </summary>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.ApisExternasController.GetB3Codes">
+            <summary>
+            📊 Lista todos os códigos de ações da B3 carregados do CSV
+            </summary>
+            <returns>Lista de todos os códigos válidos da B3</returns>
+            <response code="200">Lista de códigos da B3</response>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.ApisExternasController.ReloadB3Codes">
+            <summary>
+            🔄 Recarrega a lista de códigos da B3 do arquivo CSV
+            </summary>
+            <returns>Resultado da operação de recarga</returns>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.ApisExternasController.GetStockQuote(System.String)">
+            <summary>
+            💰 Consulta cotação atual de uma ação específica na HG Brasil
+            </summary>
+            <param name="symbol">Código da ação (ex: PETR4, VALE3)</param>
+            <returns>Cotação atual da ação</returns>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.ApisExternasController.ValidateB3Code(System.String)">
+            <summary>
+            ✅ Valida se um código de ação existe na B3
+            </summary>
+            <param name="symbol">Código da ação para validar</param>
+            <returns>Resultado da validação</returns>
+        </member>
         <member name="T:ProjetoInvestimentos.Controllers.InvestimentosController">
             <summary>
-            Controller para gerenciamento de investimentos
+            💰 INVESTIMENTOS - Gestão completa de carteira de investimentos
             </summary>
         </member>
         <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetAll">
@@ -29,7 +61,7 @@
             <summary>
             Obtém todos os investimentos de um usuário específico
             </summary>
-            <param name="userCpf">CPF do usuário (somente números)</param>
+            <param name="userCpf">CPF do usuário (apenas números, 11 dígitos)</param>
             <returns>Lista de investimentos do usuário</returns>
             <response code="200">Lista de investimentos do usuário</response>
         </member>
@@ -149,6 +181,109 @@
             <response code="200">Preço obtido com sucesso</response>
             <response code="500">Erro ao consultar preço</response>
         </member>
+        <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.InicializarDados">
+            <summary>
+            Inicializa o banco com dados de exemplo para testes
+            </summary>
+            <returns>Confirmação da inicialização</returns>
+            <response code="200">Dados de exemplo criados com sucesso</response>
+        </member>
+        <member name="T:ProjetoInvestimentos.Controllers.TestConnectionController">
+            <summary>
+            🔧 UTILITÁRIOS - Testes de conexão e diagnósticos
+            </summary>
+        </member>
+        <member name="T:ProjetoInvestimentos.Controllers.UsuariosController">
+            <summary>
+            👥 USUÁRIOS - Gerenciamento de perfis de usuários
+            </summary>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.UsuariosController.GetAll">
+            <summary>
+            Lista todos os usuários cadastrados
+            </summary>
+            <returns>Lista de usuários</returns>
+            <response code="200">Lista de usuários retornada com sucesso</response>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.UsuariosController.GetByCpf(System.String)">
+            <summary>
+            Busca um usuário pelo CPF
+            </summary>
+            <param name="cpf">CPF do usuário (apenas números, 11 dígitos)</param>
+            <returns>Dados do usuário</returns>
+            <response code="200">Usuário encontrado</response>
+            <response code="404">Usuário não encontrado</response>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.UsuariosController.Create(ProjetoInvestimentos.Controllers.CreateUserRequest)">
+            <summary>
+            Cria um novo usuário
+            </summary>
+            <param name="request">Dados do usuário a ser criado</param>
+            <returns>Usuário criado</returns>
+            <response code="201">Usuário criado com sucesso</response>
+            <response code="400">Dados inválidos ou CPF já existe</response>
+            <response code="408">Timeout na operação</response>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.UsuariosController.Update(System.String,ProjetoInvestimentos.Controllers.UpdateUserRequest)">
+            <summary>
+            Atualiza os dados de um usuário
+            </summary>
+            <param name="cpf">CPF do usuário</param>
+            <param name="request">Novos dados do usuário</param>
+            <returns>Usuário atualizado</returns>
+            <response code="200">Usuário atualizado com sucesso</response>
+            <response code="400">Dados inválidos</response>
+            <response code="404">Usuário não encontrado</response>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.UsuariosController.Delete(System.String)">
+            <summary>
+            Remove um usuário
+            </summary>
+            <param name="cpf">CPF do usuário a ser removido</param>
+            <returns>Confirmação de remoção</returns>
+            <response code="204">Usuário removido com sucesso</response>
+            <response code="404">Usuário não encontrado</response>
+            <response code="400">Usuário possui investimentos e não pode ser removido</response>
+        </member>
+        <member name="M:ProjetoInvestimentos.Controllers.UsuariosController.CreateSimple(ProjetoInvestimentos.Controllers.CreateUserRequest)">
+            <summary>
+            Cria um usuário de forma simplificada
+            </summary>
+            <param name="request">Dados do usuário a ser criado</param>
+            <returns>Usuário criado</returns>
+            <response code="201">Usuário criado com sucesso</response>
+            <response code="400">Dados inválidos ou CPF já existe</response>
+        </member>
+        <member name="T:ProjetoInvestimentos.Controllers.CreateUserRequest">
+            <summary>
+            Dados para criação de usuário
+            </summary>
+        </member>
+        <member name="P:ProjetoInvestimentos.Controllers.CreateUserRequest.Cpf">
+            <summary>
+            CPF do usuário (apenas números, sem pontos ou traços)
+            </summary>
+        </member>
+        <member name="P:ProjetoInvestimentos.Controllers.CreateUserRequest.Nome">
+            <summary>
+            Nome completo do usuário
+            </summary>
+        </member>
+        <member name="P:ProjetoInvestimentos.Controllers.CreateUserRequest.Email">
+            <summary>
+            Email do usuário (opcional, mas recomendado)
+            </summary>
+        </member>
+        <member name="T:ProjetoInvestimentos.Controllers.UpdateUserRequest">
+            <summary>
+            Dados para atualização de usuário
+            </summary>
+        </member>
+        <member name="P:ProjetoInvestimentos.Controllers.UpdateUserRequest.Nome">
+            <summary>
+            Nome do usuário
+            </summary>
+        </member>
         <member name="T:ProjetoInvestimentos.Models.Investimento">
             <summary>
             Modelo de dados para investimentos
@@ -209,24 +344,44 @@
             ID único do usuário
             </summary>
         </member>
+        <member name="P:ProjetoInvestimentos.Models.UserProfile.Email">
+            <summary>
+            Email do usuário
+            </summary>
+        </member>
         <member name="P:ProjetoInvestimentos.Models.UserProfile.Cpf">
             <summary>
             CPF do usuário
             </summary>
         </member>
-        <member name="P:ProjetoInvestimentos.Models.UserProfile.Nome">
+        <member name="P:ProjetoInvestimentos.Models.UserProfile.Dados">
             <summary>
-            Nome do usuário
+            Dados adicionais do usuário (JSON)
             </summary>
         </member>
-        <member name="P:ProjetoInvestimentos.Models.UserProfile.CreatedAt">
+        <member name="P:ProjetoInvestimentos.Models.UserProfile.CriadoEm">
             <summary>
             Data de criação
+            </summary>
+        </member>
+        <member name="P:ProjetoInvestimentos.Models.UserProfile.AlteradoEm">
+            <summary>
+            Data de alteração
+            </summary>
+        </member>
+        <member name="P:ProjetoInvestimentos.Models.UserProfile.Nome">
+            <summary>
+            Nome do usuário (não mapeado - usado para compatibilidade)
             </summary>
         </member>
         <member name="T:ProjetoInvestimentos.Services.IB3ValidationService">
             <summary>
             Serviço para validar códigos de ações da B3 usando CSV
+            </summary>
+        </member>
+        <member name="T:ProjetoInvestimentos.Services.IDatabaseInitializerService">
+            <summary>
+            Serviço para inicialização e configuração do banco de dados
             </summary>
         </member>
         <member name="T:ProjetoInvestimentos.Swagger.SwaggerExamplesFilter">
