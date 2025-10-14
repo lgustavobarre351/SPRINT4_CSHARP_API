@@ -20,6 +20,12 @@ namespace ProjetoInvestimentos.Controllers
         }
 
         [HttpGet("test-connection")]
+        [SwaggerOperation(
+            Summary = "Testa conexão com banco",
+            Description = "Verifica se a conexão com o PostgreSQL está funcionando"
+        )]
+        [SwaggerResponse(200, "Conexão OK", typeof(object))]
+        [SwaggerResponse(400, "Erro de conexão", typeof(object))]
         public async Task<IActionResult> TestConnection()
         {
             try

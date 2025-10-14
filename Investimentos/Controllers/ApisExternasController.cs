@@ -197,4 +197,62 @@ public class ApisExternasController : ControllerBase
             });
         }
     }
+
+    /// <summary>
+    /// Obtém preço atual do Bitcoin
+    /// </summary>
+    /// <returns>Preço do Bitcoin em BRL e USD</returns>
+    /// <response code="200">Preço obtido com sucesso</response>
+    /// <response code="500">Erro ao consultar preço</response>
+    [HttpGet("bitcoin-price")]
+    [SwaggerOperation(
+        Summary = "Consulta preço do Bitcoin",
+        Description = "Conecta com a API CoinGecko para obter o preço atual do Bitcoin em Real Brasileiro e Dólar Americano"
+    )]
+    [SwaggerResponse(200, "Preço do Bitcoin obtido", typeof(object))]
+    [SwaggerResponse(500, "Erro ao consultar preço do Bitcoin")]
+    public async Task<ActionResult<object>> GetBitcoinPrice()
+    {
+        try
+        {
+            // API pública do CoinGecko
+            var url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=brl,usd";
+            
+            var response = await _httpClient.GetAsync(url);
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                return StatusCode((int)response.StatusCode, new
+                {
+                    Success = false,
+                    Erro = "Erro ao consultar API CoinGecko",
+                    StatusCode = (int)response.StatusCode
+                });
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            var data = JsonSerializer.Deserialize<JsonElement>(content);
+
+            return Ok(new
+            {
+                Success = true,
+                Message = "Preço do Bitcoin obtido com sucesso",
+                Data = new
+                {
+                    Bitcoin = data,
+                    ConsultadoEm = DateTime.UtcNow,
+                    Fonte = "CoinGecko API"
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                Success = false,
+                Erro = "Erro interno ao consultar Bitcoin",
+                Detalhes = ex.Message
+            });
+        }
+    }
 }

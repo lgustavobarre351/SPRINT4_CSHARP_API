@@ -91,9 +91,7 @@ app.UseSwaggerUI(c =>
 app.UseCors();
 app.UseRouting();
 
-// --- Health Check para Render ---
-app.MapGet("/health", () => "OK");
-app.MapGet("/sprint4_csharp", () => "API Running - Sprint 4 C# Investimentos");
+// Redirecionar raiz para Swagger
 app.MapGet("/", () => Results.Redirect("/swagger"));
 
 app.MapControllers();

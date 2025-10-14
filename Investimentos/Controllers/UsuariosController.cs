@@ -78,7 +78,6 @@ public class UsuariosController : ControllerBase
     /// <returns>Usuário criado</returns>
     /// <response code="201">Usuário criado com sucesso</response>
     /// <response code="400">Dados inválidos ou CPF já existe</response>
-    /// <response code="408">Timeout na operação</response>
     [HttpPost]
     [SwaggerOperation(
         Summary = "Cria um novo usuário",
@@ -86,7 +85,6 @@ public class UsuariosController : ControllerBase
     )]
     [SwaggerResponse(201, "Usuário criado com sucesso", typeof(UserProfile))]
     [SwaggerResponse(400, "Dados inválidos ou CPF já existe")]
-    [SwaggerResponse(408, "Timeout na operação")]
     public async Task<ActionResult<UserProfile>> Create(
         [FromBody, SwaggerRequestBody("Dados do usuário", Required = true)] CreateUserRequest request)
     {
@@ -95,9 +93,53 @@ public class UsuariosController : ControllerBase
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // Como a tabela user_profiles tem foreign key para auth.users,
-            // vamos usar o endpoint CreateSimple que já funciona
-            return await CreateSimple(request);
+            // Usar SQL direto para inserção direta
+            var agora = DateTime.UtcNow;
+            var dados = !string.IsNullOrEmpty(request.Nome) ? 
+                       System.Text.Json.JsonSerializer.Serialize(new { nome = request.Nome }) : 
+                       null;
+
+            using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            // Primeiro verificar se o CPF já existe
+            using var checkCommand = new NpgsqlCommand(
+                "SELECT COUNT(1) FROM public.user_profiles WHERE cpf = @cpf", 
+                connection);
+            checkCommand.Parameters.AddWithValue("@cpf", request.Cpf);
+            
+            var result = await checkCommand.ExecuteScalarAsync();
+            var exists = result != null && (long)result > 0;
+            if (exists)
+                return BadRequest($"Usuário com CPF {request.Cpf} já existe");
+
+            // Inserir o novo usuário
+            using var insertCommand = new NpgsqlCommand(
+                "INSERT INTO public.user_profiles (cpf, email, dados, criado_em, alterado_em) VALUES (@cpf, @email, @dados::jsonb, @criado_em, @alterado_em) RETURNING id", 
+                connection);
+                
+            insertCommand.Parameters.AddWithValue("@cpf", request.Cpf);
+            insertCommand.Parameters.AddWithValue("@email", request.Email ?? (object)DBNull.Value);
+            insertCommand.Parameters.AddWithValue("@dados", dados ?? (object)DBNull.Value);
+            insertCommand.Parameters.AddWithValue("@criado_em", agora);
+            insertCommand.Parameters.AddWithValue("@alterado_em", agora);
+
+            var userId = await insertCommand.ExecuteScalarAsync();
+            if (userId == null)
+                return StatusCode(500, "Erro ao criar usuário");
+
+            var usuario = new UserProfile
+            {
+                Id = (Guid)userId,
+                Cpf = request.Cpf,
+                Email = request.Email,
+                Dados = dados,
+                CriadoEm = agora,
+                AlteradoEm = agora,
+                Nome = request.Nome
+            };
+
+            return CreatedAtAction(nameof(GetByCpf), new { cpf = usuario.Cpf }, usuario);
         }
         catch (Exception ex)
         {
@@ -117,7 +159,7 @@ public class UsuariosController : ControllerBase
     [HttpPut("{cpf}")]
     [SwaggerOperation(
         Summary = "Atualiza um usuário",
-        Description = "Modifica os dados de um usuário existente"
+        Description = "Modifica o nome e email de um usuário existente"
     )]
     [SwaggerResponse(200, "Usuário atualizado com sucesso", typeof(UserProfile))]
     [SwaggerResponse(400, "Dados inválidos")]
@@ -129,15 +171,31 @@ public class UsuariosController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
+        if (string.IsNullOrWhiteSpace(request.Nome))
+            return BadRequest("Nome é obrigatório");
+
         var usuario = await _context.UserProfiles
             .FirstOrDefaultAsync(u => u.Cpf == cpf);
         
         if (usuario == null)
             return NotFound($"Usuário com CPF {cpf} não encontrado");
 
-        usuario.Nome = request.Nome;
+        // Atualizar email
+        usuario.Email = request.Email;
+
+        // Atualizar dados JSON com o novo nome
+        var dadosJson = string.IsNullOrEmpty(usuario.Dados) ? "{}" : usuario.Dados;
+        var dados = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(dadosJson) 
+                   ?? new Dictionary<string, object>();
+        
+        dados["nome"] = request.Nome;
+        usuario.Dados = System.Text.Json.JsonSerializer.Serialize(dados);
+        usuario.AlteradoEm = DateTime.UtcNow;
         
         await _context.SaveChangesAsync();
+        
+        // Definir Nome para retorno
+        usuario.Nome = request.Nome;
         
         return Ok(usuario);
     }
@@ -178,81 +236,6 @@ public class UsuariosController : ControllerBase
         await _context.SaveChangesAsync();
         
         return NoContent();
-    }
-
-    /// <summary>
-    /// Cria um usuário de forma simplificada
-    /// </summary>
-    /// <param name="request">Dados do usuário a ser criado</param>
-    /// <returns>Usuário criado</returns>
-    /// <response code="201">Usuário criado com sucesso</response>
-    /// <response code="400">Dados inválidos ou CPF já existe</response>
-    [HttpPost("simple")]
-    [SwaggerOperation(
-        Summary = "Cria um usuário de forma simplificada",
-        Description = "Cadastra um novo usuário sem restrições de foreign key. Use este endpoint se o método normal apresentar timeout. CPF: apenas números, 11 dígitos. Email: opcional mas recomendado."
-    )]
-    [SwaggerResponse(201, "Usuário criado com sucesso", typeof(UserProfile))]
-    [SwaggerResponse(400, "Dados inválidos ou CPF já existe")]
-    public async Task<ActionResult<UserProfile>> CreateSimple(
-        [FromBody, SwaggerRequestBody("Dados do usuário", Required = true)] CreateUserRequest request)
-    {
-        try
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            // Usar SQL direto com a nova estrutura de banco (sem foreign key para auth.users)
-            var agora = DateTime.UtcNow;
-            var dados = !string.IsNullOrEmpty(request.Nome) ? 
-                       System.Text.Json.JsonSerializer.Serialize(new { nome = request.Nome }) : 
-                       null;
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            await connection.OpenAsync();
-
-            // Primeiro verificar se o CPF já existe
-            using var checkCommand = new NpgsqlCommand(
-                "SELECT COUNT(1) FROM public.user_profiles WHERE cpf = @cpf", 
-                connection);
-            checkCommand.Parameters.AddWithValue("@cpf", request.Cpf);
-            
-            var result = await checkCommand.ExecuteScalarAsync();
-            var exists = result != null && (long)result > 0;
-            if (exists)
-                return BadRequest($"Usuário com CPF {request.Cpf} já existe");
-
-            // Inserir o novo usuário (ID será gerado automaticamente)
-            using var insertCommand = new NpgsqlCommand(
-                "INSERT INTO public.user_profiles (cpf, email, dados, criado_em, alterado_em) VALUES (@cpf, @email, @dados::jsonb, @criado_em, @alterado_em) RETURNING id", 
-                connection);
-            
-            insertCommand.Parameters.AddWithValue("@cpf", request.Cpf);
-            insertCommand.Parameters.AddWithValue("@email", string.IsNullOrEmpty(request.Email) ? DBNull.Value : request.Email);
-            insertCommand.Parameters.AddWithValue("@dados", string.IsNullOrEmpty(dados) ? DBNull.Value : dados);
-            insertCommand.Parameters.AddWithValue("@criado_em", agora);
-            insertCommand.Parameters.AddWithValue("@alterado_em", agora);
-
-            var insertedId = await insertCommand.ExecuteScalarAsync();
-            var userId = insertedId != null ? (Guid)insertedId : Guid.NewGuid();
-
-            var usuario = new UserProfile
-            {
-                Id = userId,
-                Cpf = request.Cpf,
-                Email = request.Email,
-                Nome = request.Nome,
-                Dados = dados,
-                CriadoEm = agora,
-                AlteradoEm = agora
-            };
-
-            return CreatedAtAction(nameof(GetByCpf), new { cpf = usuario.Cpf }, usuario);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Erro interno: {ex.Message}");
-        }
     }
 }
 
@@ -295,7 +278,16 @@ public class UpdateUserRequest
     /// <summary>
     /// Nome do usuário
     /// </summary>
+    [Required(ErrorMessage = "Nome é obrigatório")]
     [StringLength(200, ErrorMessage = "Nome deve ter no máximo 200 caracteres")]
     [SwaggerSchema("Nome completo do usuário")]
-    public string? Nome { get; set; }
+    public string Nome { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Email do usuário
+    /// </summary>
+    [EmailAddress(ErrorMessage = "Email deve ter um formato válido")]
+    [StringLength(254, ErrorMessage = "Email deve ter no máximo 254 caracteres")]
+    [SwaggerSchema("Email do usuário (opcional)")]
+    public string? Email { get; set; }
 }
