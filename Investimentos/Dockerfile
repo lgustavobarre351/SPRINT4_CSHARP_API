@@ -23,9 +23,9 @@ WORKDIR /app
 COPY --from=build /app/publish .
 
 # Configure environment
-ENV ASPNETCORE_URLS=http://0.0.0.0:8080
+ENV ASPNETCORE_URLS=http://0.0.0.0:10000
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
-EXPOSE 8080
+EXPOSE 10000
 ENTRYPOINT ["dotnet", "Investimentos.dll"]

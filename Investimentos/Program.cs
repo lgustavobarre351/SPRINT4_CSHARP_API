@@ -91,11 +91,14 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors();
 app.UseRouting();
-app.MapControllers();
 
-// --- Redirecionamento para Swagger ---
+// --- Health Check para Render ---
+app.MapGet("/health", () => "OK");
+app.MapGet("/sprint4_csharp", () => "API Running - Sprint 4 C# Investimentos");
 app.MapGet("/", () => Results.Redirect("/swagger"));
 
-// Configuração de porta para produção
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+app.MapControllers();
+
+// --- Configuração de porta para produção ---
+var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
 app.Run($"http://0.0.0.0:{port}");
