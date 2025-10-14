@@ -98,6 +98,6 @@ app.MapGet("/", () => Results.Redirect("/swagger"));
 
 app.MapControllers();
 
-// --- Configuração de porta para desenvolvimento local ---
+// --- Configuração de porta para Render e desenvolvimento local ---
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5171";
-app.Run($"http://localhost:{port}");
+app.Run($"http://0.0.0.0:{port}");
