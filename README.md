@@ -62,7 +62,26 @@ API RESTful moderna para gestão completa de investimentos, desenvolvida seguind
 - Git para clonar o repositório
 - Conexão com internet (banco na nuvem)
 
-### **⚡ Execução Rápida**
+### **⚡ MÉTODOS DE EXECUÇÃO**
+
+#### **🎯 Método 1: SUPER RÁPIDO (Recomendado)**
+
+**Windows (Duplo-clique):**
+1. Baixe o projeto
+2. Execute o arquivo: `iniciar-api.bat`
+3. Aguarde a mensagem: "📋 Swagger: http://localhost:5171/swagger"
+4. Acesse o link automaticamente
+
+**macOS/Linux:**
+```bash
+# 1. Clonar e executar
+git clone https://github.com/lgustavobarre351/SPRINT4_CSHARP_API.git
+cd SPRINT4_CSHARP_API
+chmod +x iniciar-api.sh
+./iniciar-api.sh
+```
+
+#### **�️ Método 2: Linha de Comando**
 ```bash
 # 1. Clonar o repositório
 git clone https://github.com/lgustavobarre351/SPRINT4_CSHARP_API.git
@@ -70,19 +89,82 @@ git clone https://github.com/lgustavobarre351/SPRINT4_CSHARP_API.git
 # 2. Navegar para a pasta do projeto
 cd SPRINT4_CSHARP_API/Investimentos
 
-# 3. Restaurar dependências
-dotnet restore
-
-# 4. Executar a aplicação
+# 3. Executar
 dotnet run
 ```
 
-### **🌐 Acessar a API**
-- **Local**: http://localhost:5171/swagger
-- **Produção**: https://sprint4-csharp-api.onrender.com/swagger
+#### **💻 Método 3: Visual Studio/VS Code**
+1. Abra o arquivo `SPRINT4_CSHARP_API.sln` ou `Investimentos.csproj`
+2. Pressione **F5** ou clique em "▶️ Run"
+3. Swagger abrirá automaticamente
 
-### **� Configuração Adicional**
-A API está configurada para funcionar com banco PostgreSQL na nuvem (Supabase). Para ambiente local, ajuste a connection string em `appsettings.Development.json` se necessário.
+#### **🔄 Método 4: Desenvolvimento com Auto-reload**
+```bash
+cd SPRINT4_CSHARP_API/Investimentos
+dotnet watch run  # Recarrega automaticamente ao salvar arquivos
+```
+
+#### **🔧 Método 5: Porta Customizada**
+```bash
+cd SPRINT4_CSHARP_API/Investimentos
+
+# Windows PowerShell
+$env:PORT="8080"; dotnet run
+
+# macOS/Linux Bash  
+PORT=8080 dotnet run
+
+# Acesse: http://localhost:8080/swagger
+```
+
+### **🌐 URLs DISPONÍVEIS**
+
+#### **💻 Local (após executar):**
+- **🎯 Swagger Principal**: http://localhost:5171/swagger
+- **🌐 API Base**: http://localhost:5171/api
+- **💊 Health Check**: http://localhost:5171/api/TestConnection
+- **📋 Ajuda Investimentos**: http://localhost:5171/api/investimentos/ajuda
+- **👥 Ajuda Usuários**: http://localhost:5171/api/usuarios/ajuda
+
+#### **🌍 Produção:**
+- **🚀 Render**: https://sprint4-csharp-api.onrender.com/swagger
+
+### **❓ PROBLEMAS COMUNS E SOLUÇÕES**
+
+#### **Erro: "Porta 5171 já em uso"**
+```bash
+# Windows
+netstat -ano | findstr :5171
+# Anote o PID e execute: taskkill /PID [número] /F
+
+# macOS/Linux  
+lsof -ti:5171 | xargs kill
+```
+
+#### **Erro: ".NET não encontrado"**
+- **Solução**: Instale .NET 9.0 SDK: https://dotnet.microsoft.com/download/dotnet/9.0
+- **Verificar**: `dotnet --version` (deve mostrar 9.x.x)
+
+#### **Erro: "Connection string/Database"**
+- **Não se preocupe!** A API usa Supabase (nuvem)
+- **Solução**: Verifique sua conexão com internet
+- **Alternativa**: A API funcionará mesmo sem conexão (alguns endpoints)
+
+#### **Erro: "Project not found"**
+- **Solução**: Certifique-se de estar na pasta correta
+- **Comando**: `cd SPRINT4_CSHARP_API/Investimentos`
+
+### **💡 DICAS DE DESENVOLVIMENTO**
+
+✅ **Para desenvolvimento ativo**: Use `dotnet watch run` (auto-reload)  
+✅ **Para testar rapidamente**: Use `iniciar-api.bat` (Windows)  
+✅ **Para debugging**: Use Visual Studio/VS Code com F5  
+✅ **Para deploy**: A configuração já está pronta para Render/Azure  
+
+### **📊 VISUALIZAÇÃO DA ARQUITETURA**
+![Diagrama da API](Diagrama.png)
+
+*Diagrama completo mostrando a arquitetura, fluxo de dados e relacionamentos da API*
 
 ## �📋 **DOCUMENTAÇÃO DA API**
 
@@ -274,10 +356,15 @@ A aplicação está configurada para deploy automático em:
 - `PORT`: Porta da aplicação (automática no Render)
 - `ConnectionStrings__DefaultConnection`: String de conexão PostgreSQL
 
-## � **DIAGRAMAS E DOCUMENTAÇÃO TÉCNICA**
+## 📊 **DIAGRAMAS E DOCUMENTAÇÃO TÉCNICA**
 
-### **📋 Diagramas Disponíveis**
-Para visualizações completas da arquitetura, consulte: **[diagrama-mermaid.md](diagrama-mermaid.md)**
+### **🎨 Diagrama Principal**
+![Arquitetura da API de Investimentos](Diagrama.png)
+
+*Visão completa da arquitetura, mostrando controllers, services, banco de dados e APIs externas*
+
+### **📋 Diagramas Técnicos Detalhados**
+Para visualizações completas e código Mermaid, consulte: **[diagrama-mermaid.md](diagrama-mermaid.md)**
 
 🔹 **Arquitetura da API** - Visão completa dos componentes  
 🔹 **Modelo de Dados (ERD)** - Relacionamentos entre tabelas  
@@ -286,11 +373,11 @@ Para visualizações completas da arquitetura, consulte: **[diagrama-mermaid.md]
 🔹 **Dashboard LINQ** - Métricas e agregações  
 🔹 **Tratamento Timezone** - Solução PostgreSQL  
 
-### **🎯 Como usar os diagramas**
+### **🎯 Como usar os diagramas técnicos**
 1. Acesse o arquivo [diagrama-mermaid.md](diagrama-mermaid.md)
 2. Copie o código Mermaid desejado
 3. Cole em: [Mermaid Live Editor](https://mermaid-js.github.io/mermaid-live-editor/)
-4. Ou use diretamente no GitHub/GitLab
+4. Ou use diretamente no GitHub/GitLab/Notion
 
 ## �📈 **ROADMAP FUTURO**
 

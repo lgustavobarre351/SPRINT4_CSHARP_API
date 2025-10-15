@@ -99,6 +99,30 @@ app.MapGet("/", () => Results.Redirect("/swagger"));
 
 app.MapControllers();
 
-// --- Configuração de porta para Render e desenvolvimento local ---
+// --- Configuração Multi-Ambiente (Local + Render/Azure/etc) ---
+var environment = app.Environment.EnvironmentName;
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5171";
-app.Run($"http://0.0.0.0:{port}");
+
+if (environment == "Development")
+{
+    // Desenvolvimento local - múltiplas URLs
+    var urls = new[]
+    {
+        $"http://localhost:{port}",           // localhost tradicional
+        $"http://127.0.0.1:{port}",          // IP local
+        $"http://0.0.0.0:{port}"             // todas as interfaces
+    };
+    
+    Console.WriteLine("🚀 API rodando em ambiente de DESENVOLVIMENTO");
+    Console.WriteLine($"📋 Swagger Local: http://localhost:{port}/swagger");
+    Console.WriteLine($"🌐 Todas as URLs: {string.Join(", ", urls)}");
+    
+    app.Run($"http://localhost:{port}");
+}
+else
+{
+    // Produção (Render, Azure, etc.) - usar 0.0.0.0
+    Console.WriteLine("🌍 API rodando em ambiente de PRODUÇÃO");
+    Console.WriteLine($"🚀 Porta: {port}");
+    app.Run($"http://0.0.0.0:{port}");
+}
