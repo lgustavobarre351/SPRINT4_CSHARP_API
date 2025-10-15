@@ -1,4 +1,4 @@
-# � API de Investimentos - Challenge FIAP 2024
+# 💰 API de Investimentos - Challenge FIAP 2024
 
 > **Sistema completo de gerenciamento de investimentos com ASP.NET Core 9.0 e PostgreSQL**
 
@@ -15,7 +15,7 @@
 
 API RESTful moderna para gestão completa de investimentos, desenvolvida seguindo as melhores práticas de arquitetura e clean code. O sistema permite cadastro de usuários, gerenciamento de carteira de investimentos e integração com APIs externas para validação de dados.
 
-### **� Principais Funcionalidades**
+### **🚀 Principais Funcionalidades**
 
 ✅ **Gestão de Usuários**
 - Cadastro com CPF e validação
@@ -44,16 +44,11 @@ API RESTful moderna para gestão completa de investimentos, desenvolvida seguind
 - Configuração multi-ambiente (dev/prod)
 - Timezone handling para PostgreSQL
 
-## 🛠️ **STACK TECNOLÓGICA**
+## 🛠️ **TECNOLOGIAS**
 
-| Tecnologia | Versão | Uso |
-|------------|--------|-----|
-| **ASP.NET Core** | 9.0 | Framework web principal |
-| **Entity Framework Core** | 9.0 | ORM para acesso a dados |
-| **PostgreSQL** | 16+ | Banco de dados relacional |
-| **Supabase** | Cloud | Hospedagem do banco |
-| **Swagger** | 6.6+ | Documentação da API |
-| **Npgsql** | 9.0+ | Driver PostgreSQL |
+**Backend:** ASP.NET Core 9.0 • Entity Framework Core • PostgreSQL/Supabase  
+**Documentação:** Swagger/OpenAPI • Mermaid Diagrams  
+**Integrações:** B3 Brasil Bolsa • ViaCEP • Yahoo Finance
 
 ## 🚀 **COMO EXECUTAR**
 
@@ -166,50 +161,33 @@ lsof -ti:5171 | xargs kill
 
 *Diagrama completo mostrando a arquitetura, fluxo de dados e relacionamentos da API*
 
-## �📋 **DOCUMENTAÇÃO DA API**
+##  **ENDPOINTS DA API**
 
-### **👥 USUÁRIOS** `/api/usuarios`
-
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| `GET` | `/api/usuarios/ajuda` | 🚀 Guia de uso da API |
-| `GET` | `/api/usuarios` | 👥 Lista todos os usuários |
-| `GET` | `/api/usuarios/{cpf}` | 🔍 Busca usuário por CPF |
-| `POST` | `/api/usuarios` | 🆕 Cria novo usuário |
-| `PUT` | `/api/usuarios/{cpf}` | ✏️ Atualiza usuário |
-| `DELETE` | `/api/usuarios/{cpf}` | 🗑️ Remove usuário |
-
-### **💰 INVESTIMENTOS** `/api/investimentos`
-
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| `GET` | `/api/investimentos/ajuda` | 🚀 Guia de uso da API |
-| `GET` | `/api/investimentos` | 📋 Lista todos os investimentos |
-| `GET` | `/api/investimentos/{id}` | 🔍 Busca por ID |
-| `GET` | `/api/investimentos/usuario/{cpf}` | 👤 Por usuário |
-| `POST` | `/api/investimentos` | 💰 Criar investimento |
-| `PUT` | `/api/investimentos/{id}` | 🔄 Atualizar investimento |
-| `DELETE` | `/api/investimentos/{id}` | 🗑️ Remover investimento |
-
-### **📊 CONSULTAS AVANÇADAS**
-
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| `GET` | `/api/investimentos/tipo/{tipo}` | 📊 Filtrar por tipo |
-| `GET` | `/api/investimentos/operacao/{operacao}` | 💰 Compras ou vendas |
-| `GET` | `/api/investimentos/saldo/{cpf}` | 💵 Saldo líquido |
-| `GET` | `/api/investimentos/recentes` | ⏰ Investimentos recentes |
-| `GET` | `/api/investimentos/dashboard` | 📈 Dashboard resumo |
-| `GET` | `/api/investimentos/usuarios` | 👥 Lista de CPFs |
-
-### **🌐 APIS EXTERNAS** `/api/apisexternas`
-
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| `GET` | `/api/apisexternas/codigos-b3` | 📈 Códigos B3 válidos |
-| `GET` | `/api/apisexternas/validar-codigo/{codigo}` | ✅ Validar ação |
-| `GET` | `/api/apisexternas/cotacao/{codigo}` | 💹 Cotação atual |
-| `GET` | `/api/apisexternas/cep/{cep}` | 📍 Consultar CEP |
+| **Categoria** | **Método** | **Endpoint** | **Descrição** |
+|---------------|------------|--------------|---------------|
+| **👥 Usuários** | `GET` | `/api/usuarios/ajuda` | 🚀 Guia de uso |
+| | `GET` | `/api/usuarios` | 👥 Lista todos os usuários |
+| | `GET` | `/api/usuarios/{cpf}` | 🔍 Busca por CPF |
+| | `POST` | `/api/usuarios` | 🆕 Cria novo usuário |
+| | `PUT` | `/api/usuarios/{cpf}` | ✏️ Atualiza usuário |
+| | `DELETE` | `/api/usuarios/{cpf}` | 🗑️ Remove usuário |
+| **💰 Investimentos** | `GET` | `/api/investimentos/ajuda` | 🚀 Guia de uso |
+| | `GET` | `/api/investimentos` | 📋 Lista todos |
+| | `GET` | `/api/investimentos/{id}` | 🔍 Busca por ID |
+| | `GET` | `/api/investimentos/usuario/{cpf}` | 👤 Por usuário |
+| | `POST` | `/api/investimentos` | 💰 Criar investimento |
+| | `PUT` | `/api/investimentos/{id}` | 🔄 Atualizar |
+| | `DELETE` | `/api/investimentos/{id}` | 🗑️ Remover |
+| **📊 Consultas LINQ** | `GET` | `/api/investimentos/tipo/{tipo}` | 📊 Filtrar por tipo |
+| | `GET` | `/api/investimentos/operacao/{operacao}` | 💰 Compras/vendas |
+| | `GET` | `/api/investimentos/saldo/{cpf}` | 💵 Saldo líquido |
+| | `GET` | `/api/investimentos/recentes` | ⏰ Recentes |
+| | `GET` | `/api/investimentos/dashboard` | 📈 Dashboard |
+| | `GET` | `/api/investimentos/usuarios` | 👥 Lista CPFs |
+| **🌐 APIs Externas** | `GET` | `/api/apisexternas/codigos-b3` | 📈 Códigos B3 |
+| | `GET` | `/api/apisexternas/validar-codigo/{codigo}` | ✅ Validar ação |
+| | `GET` | `/api/apisexternas/cotacao/{codigo}` | 💹 Cotação |
+| | `GET` | `/api/apisexternas/cep/{cep}` | 📍 Consultar CEP |
 
 ## 🗄️ **ARQUITETURA DO BANCO**
 
@@ -379,7 +357,7 @@ Para visualizações completas e código Mermaid, consulte: **[diagrama-mermaid.
 3. Cole em: [Mermaid Live Editor](https://mermaid-js.github.io/mermaid-live-editor/)
 4. Ou use diretamente no GitHub/GitLab/Notion
 
-## �📈 **ROADMAP FUTURO**
+## 🚧 **ROADMAP FUTURO**
 
 - [ ] Autenticação JWT
 - [ ] Cache Redis para cotações
