@@ -31,21 +31,19 @@ public class EfInvestimentoRepository : IInvestimentoRepository
         _context = context;
     }
 
+    // Método utilitário para garantir que DateTime seja UTC
+    private static DateTime EnsureUtc(DateTime dateTime)
+    {
+        return dateTime.Kind == DateTimeKind.Utc ? 
+               dateTime : 
+               DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
+    }
+
     public async Task<IEnumerable<Investimento>> GetAllAsync()
     {
-        var investimentos = await (from i in _context.Investimentos
-                                   join u in _context.UserProfiles on i.UserId equals u.Id
-                                   orderby i.CriadoEm descending
-                                   select new { Investimento = i, UserCpf = u.Cpf })
-                                  .ToListAsync();
-
-        // Preencher UserCpf para cada investimento
-        foreach (var item in investimentos)
-        {
-            item.Investimento.UserCpf = item.UserCpf;
-        }
-
-        return investimentos.Select(x => x.Investimento);
+        return await _context.Investimentos
+            .OrderByDescending(i => i.CriadoEm)
+            .ToListAsync();
     }
 
     public async Task<Investimento?> GetByIdAsync(Guid id)
@@ -56,30 +54,27 @@ public class EfInvestimentoRepository : IInvestimentoRepository
 
     public async Task<IEnumerable<Investimento>> GetByUserCpfAsync(string userCpf)
     {
-        var investimentos = await (from i in _context.Investimentos
-                                   join u in _context.UserProfiles on i.UserId equals u.Id
-                                   where u.Cpf == userCpf
-                                   orderby i.CriadoEm descending
-                                   select i).ToListAsync();
-
-        // Preencher UserCpf para cada investimento
-        foreach (var inv in investimentos)
-        {
-            inv.UserCpf = userCpf;
-        }
-
-        return investimentos;
+        return await _context.Investimentos
+            .Where(i => i.UserCpf == userCpf)
+            .OrderByDescending(i => i.CriadoEm)
+            .ToListAsync();
     }
 
     public async Task<Investimento> CreateAsync(Investimento investimento)
     {
-        investimento.Id = Guid.NewGuid();
-        investimento.CriadoEm = DateTime.UtcNow;
-        investimento.AlteradoEm = DateTime.UtcNow;
-
-        // Se UserCpf foi fornecido, buscar ou criar o usuário
-        if (!string.IsNullOrEmpty(investimento.UserCpf))
+        try
         {
+            investimento.Id = Guid.NewGuid();
+            investimento.CriadoEm = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
+            investimento.AlteradoEm = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
+
+            // Validar se CPF foi fornecido
+            if (string.IsNullOrEmpty(investimento.UserCpf))
+            {
+                throw new ArgumentException("CPF do usuário é obrigatório");
+            }
+
+            // Buscar ou criar o usuário
             var user = await _context.UserProfiles
                 .FirstOrDefaultAsync(u => u.Cpf == investimento.UserCpf);
             
@@ -90,29 +85,96 @@ public class EfInvestimentoRepository : IInvestimentoRepository
                 {
                     Id = Guid.NewGuid(),
                     Cpf = investimento.UserCpf,
-                    Nome = null, // Nome pode ser definido posteriormente
-                    CriadoEm = DateTime.UtcNow,
-                    AlteradoEm = DateTime.UtcNow
+                    Email = null, // Email pode ser definido posteriormente
+                    Dados = null, // Dados podem ser definidos posteriormente
+                    CriadoEm = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+                    AlteradoEm = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc)
                 };
                 
                 _context.UserProfiles.Add(user);
-                await _context.SaveChangesAsync();
+                
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (Microsoft.EntityFrameworkCore.DbUpdateException dbEx)
+                {
+                    var innerMessage = dbEx.InnerException?.Message ?? "Sem detalhes adicionais";
+                    throw new InvalidOperationException($"Erro de banco ao criar usuário com CPF {investimento.UserCpf}: {dbEx.Message}. Inner: {innerMessage}", dbEx);
+                }
+                catch (Exception ex)
+                {
+                    var innerMessage = ex.InnerException?.Message ?? "Sem detalhes adicionais";
+                    throw new InvalidOperationException($"Erro ao criar usuário com CPF {investimento.UserCpf}: {ex.Message}. Inner: {innerMessage}", ex);
+                }
             }
             
             investimento.UserId = user.Id;
-        }
+            // Manter UserCpf - agora é mapeado para coluna user_cpf no banco
 
-        _context.Investimentos.Add(investimento);
-        await _context.SaveChangesAsync();
-        return investimento;
+            // Adicionar investimento
+            _context.Investimentos.Add(investimento);
+            
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Microsoft.EntityFrameworkCore.DbUpdateException dbEx)
+            {
+                var innerMessage = dbEx.InnerException?.Message ?? "Sem detalhes adicionais";
+                throw new InvalidOperationException($"Erro de banco ao salvar investimento: {dbEx.Message}. Inner: {innerMessage}", dbEx);
+            }
+            catch (Exception ex)
+            {
+                var innerMessage = ex.InnerException?.Message ?? "Sem detalhes adicionais";
+                throw new InvalidOperationException($"Erro ao salvar investimento: {ex.Message}. Inner: {innerMessage}", ex);
+            }
+            
+            return investimento;
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Erro ao processar investimento: {ex.Message}", ex);
+        }
     }
 
     public async Task<Investimento> UpdateAsync(Investimento investimento)
     {
-        investimento.AlteradoEm = DateTime.UtcNow;
-        _context.Investimentos.Update(investimento);
-        await _context.SaveChangesAsync();
-        return investimento;
+        try
+        {
+            // Desanexar qualquer entidade que possa estar sendo rastreada
+            var tracked = _context.ChangeTracker.Entries<Investimento>()
+                .FirstOrDefault(e => e.Entity.Id == investimento.Id);
+            if (tracked != null)
+            {
+                _context.Entry(tracked.Entity).State = EntityState.Detached;
+            }
+
+            // Criar um novo objeto garantindo que todos os DateTime sejam UTC
+            var investimentoParaAtualizar = new Investimento
+            {
+                Id = investimento.Id,
+                UserCpf = investimento.UserCpf,
+                UserId = investimento.UserId,
+                Tipo = investimento.Tipo,
+                Codigo = investimento.Codigo,
+                Valor = investimento.Valor,
+                Operacao = investimento.Operacao,
+                CriadoEm = EnsureUtc(investimento.CriadoEm),
+                AlteradoEm = EnsureUtc(DateTime.UtcNow)
+            };
+            
+            // Anexar e marcar como modificado
+            _context.Entry(investimentoParaAtualizar).State = EntityState.Modified;
+            
+            await _context.SaveChangesAsync();
+            return investimentoParaAtualizar;
+        }
+        catch (Exception ex)
+        {
+            var innerMessage = ex.InnerException?.Message ?? "Sem detalhes adicionais";
+            throw new InvalidOperationException($"Erro ao atualizar investimento: {ex.Message}. Inner: {innerMessage}", ex);
+        }
     }
 
     public async Task DeleteAsync(Guid id)
@@ -153,7 +215,7 @@ public class EfInvestimentoRepository : IInvestimentoRepository
 
     public async Task<IEnumerable<Investimento>> GetRecentInvestmentsAsync(int days = 30)
     {
-        var cutoffDate = DateTime.UtcNow.AddDays(-days);
+        var cutoffDate = DateTime.SpecifyKind(DateTime.UtcNow.AddDays(-days), DateTimeKind.Utc);
         return await _context.Investimentos
             .Where(i => i.CriadoEm >= cutoffDate)
             .OrderByDescending(i => i.CriadoEm)

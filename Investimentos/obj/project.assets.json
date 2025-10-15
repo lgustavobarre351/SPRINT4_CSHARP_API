@@ -7927,11 +7927,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\luisg\\Desktop\\SPRITN_V2\\SPRINT4_CSHARP_API\\Investimentos\\Investimentos.csproj",
+      "projectUniqueName": "C:\\Users\\luisg\\Desktop\\CSHARP_VFINAL\\SPRINT4_CSHARP_API\\Investimentos\\Investimentos.csproj",
       "projectName": "Investimentos",
-      "projectPath": "C:\\Users\\luisg\\Desktop\\SPRITN_V2\\SPRINT4_CSHARP_API\\Investimentos\\Investimentos.csproj",
+      "projectPath": "C:\\Users\\luisg\\Desktop\\CSHARP_VFINAL\\SPRINT4_CSHARP_API\\Investimentos\\Investimentos.csproj",
       "packagesPath": "C:\\Users\\luisg\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\luisg\\Desktop\\SPRITN_V2\\SPRINT4_CSHARP_API\\Investimentos\\obj\\",
+      "outputPath": "C:\\Users\\luisg\\Desktop\\CSHARP_VFINAL\\SPRINT4_CSHARP_API\\Investimentos\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

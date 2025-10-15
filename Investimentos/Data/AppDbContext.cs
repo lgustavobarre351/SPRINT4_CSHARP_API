@@ -20,15 +20,13 @@ public class AppDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.UserCpf).HasColumnName("user_cpf"); // Mapear para coluna user_cpf
             entity.Property(e => e.Tipo).HasColumnName("tipo");
             entity.Property(e => e.Codigo).HasColumnName("codigo");
             entity.Property(e => e.Valor).HasColumnName("valor").HasColumnType("numeric(12,2)");
             entity.Property(e => e.Operacao).HasColumnName("operacao");
             entity.Property(e => e.CriadoEm).HasColumnName("criado_em");
             entity.Property(e => e.AlteradoEm).HasColumnName("alterado_em");
-            
-            // UserCpf não é mapeado para coluna - será calculado via query
-            entity.Ignore(e => e.UserCpf);
         });
 
         modelBuilder.Entity<UserProfile>(entity =>

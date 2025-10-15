@@ -47,6 +47,9 @@ builder.Services.AddSwaggerGen(c =>
 // --- Entity Framework ---
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
     ?? throw new InvalidOperationException("Connection string not found");
+// Configurar Npgsql para usar comportamento legacy de timestamp (mais tolerante)
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 

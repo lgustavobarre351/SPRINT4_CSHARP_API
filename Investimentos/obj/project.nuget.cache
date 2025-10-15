@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "4BJdG9JmEi8=",
+  "dgSpecHash": "WXcBxB6xHQ0=",
   "success": true,
-  "projectFilePath": "C:\\Users\\luisg\\Desktop\\SPRITN_V2\\SPRINT4_CSHARP_API\\investimentos\\Investimentos.csproj",
+  "projectFilePath": "C:\\Users\\luisg\\Desktop\\CSHARP_VFINAL\\SPRINT4_CSHARP_API\\investimentos\\Investimentos.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\luisg\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\luisg\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.2\\microsoft.aspnetcore.openapi.9.0.2.nupkg.sha512",

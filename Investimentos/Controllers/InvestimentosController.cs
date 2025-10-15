@@ -9,11 +9,11 @@ using System.Text.Json;
 namespace ProjetoInvestimentos.Controllers;
 
 /// <summary>
-/// Controller de investimentos
+/// Controller de investimentos - API SUPER SIMPLIFICADA
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-[SwaggerTag("2️⃣ INVESTIMENTOS DA BASE - CRUD completo com consultas LINQ avançadas")]
+[SwaggerTag("💰 INVESTIMENTOS - API Simplificada (só CPF + dados básicos!)")]
 public class InvestimentosController : ControllerBase
 {
     private readonly IInvestimentoRepository _repository;
@@ -23,17 +23,55 @@ public class InvestimentosController : ControllerBase
         _repository = repository;
     }
 
+    /// <summary>
+    /// 🚀 GUIA RÁPIDO - Como usar a API
+    /// </summary>
+    /// <returns>Instruções simples de uso</returns>
+    [HttpGet("ajuda")]
+    [SwaggerOperation(
+        Summary = "🚀 AJUDA - Como usar a API",
+        Description = "Clique aqui primeiro! Mostra um guia simples de como usar todos os endpoints desta API de forma fácil"
+    )]
+    [SwaggerResponse(200, "Guia de uso da API")]
+    public ActionResult GetHelp()
+    {
+        var help = new
+        {
+            Titulo = "🎯 GUIA RÁPIDO - API de Investimentos",
+            ComoUsar = new
+            {
+                CriarInvestimento = "POST /api/investimentos - Só precisa de: CPF (11 números), tipo, código, valor e operação (compra/venda)",
+                VerTodos = "GET /api/investimentos - Lista TODOS os investimentos",
+                VerPorCPF = "GET /api/investimentos/usuario/{cpf} - Ver investimentos de uma pessoa",
+                EditarInvestimento = "PUT /api/investimentos/{id} - Só o ID vai na URL, dados no body",
+                DeletarInvestimento = "DELETE /api/investimentos/{id} - Remove permanentemente",
+                CalcularSaldo = "GET /api/investimentos/saldo/{cpf} - Quanto a pessoa tem líquido",
+                Dashboard = "GET /api/investimentos/dashboard - Resumo geral por tipo"
+            },
+            ExemploSimples = new
+            {
+                CPF = "12345678901",
+                Tipo = "Ação",
+                Codigo = "PETR4",
+                Valor = 1500.50m,
+                Operacao = "compra"
+            },
+            Dica = "💡 A API gera automaticamente IDs, datas e busca usuários pelo CPF!"
+        };
+        return Ok(help);
+    }
+
     // CRUD completo (35%)
     
     /// <summary>
-    /// Obtém todos os investimentos
+    /// 📋 Lista todos os investimentos (mais recentes primeiro)
     /// </summary>
-    /// <returns>Lista de todos os investimentos ordenados por data de criação</returns>
-    /// <response code="200">Retorna a lista de investimentos</response>
+    /// <returns>Lista de todos os investimentos ordenados por data</returns>
+    /// <response code="200">Lista completa de investimentos</response>
     [HttpGet]
     [SwaggerOperation(
-        Summary = "Lista todos os investimentos",
-        Description = "Retorna uma lista completa de todos os investimentos cadastrados, ordenados por data de criação (mais recentes primeiro)"
+        Summary = "📋 Lista TODOS os investimentos",
+        Description = "Visualize toda a base de dados de investimentos, ordenados por data (mais recentes primeiro). Ideal para ter uma visão geral completa!"
     )]
     [SwaggerResponse(200, "Lista de investimentos retornada com sucesso", typeof(IEnumerable<Investimento>))]
     public async Task<ActionResult<IEnumerable<Investimento>>> GetAll()
@@ -43,16 +81,16 @@ public class InvestimentosController : ControllerBase
     }
 
     /// <summary>
-    /// Obtém um investimento específico pelo ID
+    /// 🔍 Busca um investimento específico pelo ID
     /// </summary>
     /// <param name="id">ID único do investimento</param>
-    /// <returns>Dados do investimento</returns>
+    /// <returns>Dados completos do investimento</returns>
     /// <response code="200">Investimento encontrado</response>
     /// <response code="404">Investimento não encontrado</response>
     [HttpGet("{id:guid}")]
     [SwaggerOperation(
-        Summary = "Busca investimento por ID",
-        Description = "Retorna os dados de um investimento específico baseado no seu ID único"
+        Summary = "🔍 Busca investimento por ID",
+        Description = "Cole o ID de qualquer investimento para ver todos os seus detalhes completos"
     )]
     [SwaggerResponse(200, "Investimento encontrado", typeof(Investimento))]
     [SwaggerResponse(404, "Investimento não encontrado")]
@@ -67,82 +105,154 @@ public class InvestimentosController : ControllerBase
     }
 
     /// <summary>
-    /// Obtém todos os investimentos de um usuário específico
+    /// 👤 Lista todos os investimentos de um usuário
     /// </summary>
     /// <param name="userCpf">CPF do usuário (apenas números, 11 dígitos)</param>
-    /// <returns>Lista de investimentos do usuário</returns>
+    /// <returns>Todos os investimentos do usuário</returns>
     /// <response code="200">Lista de investimentos do usuário</response>
     [HttpGet("usuario/{userCpf}")]
     [SwaggerOperation(
-        Summary = "Lista investimentos por CPF do usuário",
-        Description = "Retorna todos os investimentos de um usuário. Digite apenas os números do CPF, sem pontos ou traços. Exemplo: 12345678901"
+        Summary = "👤 Meus investimentos por CPF",
+        Description = "Digite apenas os NÚMEROS do CPF (sem pontos ou traços) para ver todos os investimentos dessa pessoa. Exemplo: 12345678901"
     )]
     [SwaggerResponse(200, "Lista de investimentos do usuário", typeof(IEnumerable<Investimento>))]
     public async Task<ActionResult<IEnumerable<Investimento>>> GetByUserCpf(
-        [FromRoute, SwaggerParameter("CPF do usuário (apenas números, exemplo: 12345678901)", Required = true)] string userCpf)
+        [FromRoute, SwaggerParameter("CPF apenas números (exemplo: 12345678901)", Required = true)] string userCpf)
     {
         var investimentos = await _repository.GetByUserCpfAsync(userCpf);
         return Ok(investimentos);
     }
 
     /// <summary>
-    /// Cria um novo investimento
+    /// Cria um novo investimento (SIMPLIFICADO)
     /// </summary>
-    /// <param name="investimento">Dados do investimento a ser criado</param>
+    /// <param name="request">Dados simplificados do investimento</param>
     /// <returns>Investimento criado com ID gerado</returns>
     /// <response code="201">Investimento criado com sucesso</response>
     /// <response code="400">Dados inválidos</response>
     [HttpPost]
     [SwaggerOperation(
-        Summary = "Cria um novo investimento",
-        Description = "Cadastra um novo investimento. Campo obrigatórios: userCpf (11 números), tipo, codigo, valor, operacao (compra/venda). O ID será gerado automaticamente."
+        Summary = "🚀 Cria investimento (APENAS CPF + dados básicos)",
+        Description = "Cadastra um novo investimento de forma simplificada. Informe apenas: CPF (11 dígitos), tipo, código, valor e operação. IDs e datas são gerados automaticamente!"
     )]
     [SwaggerResponse(201, "Investimento criado com sucesso", typeof(Investimento))]
     [SwaggerResponse(400, "Dados de entrada inválidos")]
     public async Task<ActionResult<Investimento>> Create(
-        [FromBody, SwaggerRequestBody("Dados do investimento", Required = true)] Investimento investimento)
+        [FromBody, SwaggerRequestBody("Dados simplificados do investimento", Required = true)] CreateInvestimentoRequest request)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var created = await _repository.CreateAsync(investimento);
-        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        // Validações adicionais
+        if (request.Operacao.ToLower() != "compra" && request.Operacao.ToLower() != "venda")
+        {
+            return BadRequest("Operação deve ser 'compra' ou 'venda'");
+        }
+
+        try
+        {
+            // Criar objeto Investimento a partir do DTO
+            var investimento = new Investimento
+            {
+                UserCpf = request.UserCpf.Trim(),
+                Tipo = request.Tipo.Trim(),
+                Codigo = request.Codigo.Trim().ToUpper(),
+                Valor = request.Valor,
+                Operacao = request.Operacao.Trim().ToLower(),
+                // Id, UserId, CriadoEm e AlteradoEm serão definidos no repositório
+            };
+
+            var created = await _repository.CreateAsync(investimento);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest($"Dados inválidos: {ex.Message}");
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest($"Erro de operação: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            // Log do erro completo (em produção, usar ILogger)
+            var fullError = ex.InnerException != null ? 
+                $"{ex.Message} | Inner: {ex.InnerException.Message}" : 
+                ex.Message;
+            
+            return BadRequest($"Erro ao criar investimento: {fullError}");
+        }
     }
 
     /// <summary>
-    /// Atualiza um investimento existente
+    /// Atualiza um investimento existente (SIMPLIFICADO)
     /// </summary>
     /// <param name="id">ID do investimento a ser atualizado</param>
-    /// <param name="investimento">Novos dados do investimento</param>
+    /// <param name="request">Novos dados do investimento (apenas campos editáveis)</param>
     /// <returns>Investimento atualizado</returns>
     /// <response code="200">Investimento atualizado com sucesso</response>
     /// <response code="400">ID não confere ou dados inválidos</response>
     /// <response code="404">Investimento não encontrado</response>
     [HttpPut("{id:guid}")]
     [SwaggerOperation(
-        Summary = "Atualiza um investimento",
-        Description = "Modifica os dados de um investimento existente. O ID deve ser fornecido na URL e no corpo da requisição."
+        Summary = "🔄 Atualiza investimento (ID na URL, dados no body)",
+        Description = "Modifica apenas os dados editáveis: tipo, código, valor e operação. O ID vem na URL. CPF, datas e IDs internos são preservados automaticamente!"
     )]
     [SwaggerResponse(200, "Investimento atualizado com sucesso", typeof(Investimento))]
     [SwaggerResponse(400, "ID não confere ou dados inválidos")]
     [SwaggerResponse(404, "Investimento não encontrado")]
     public async Task<ActionResult<Investimento>> Update(
         [FromRoute, SwaggerParameter("ID do investimento", Required = true)] Guid id, 
-        [FromBody, SwaggerRequestBody("Dados atualizados do investimento", Required = true)] Investimento investimento)
+        [FromBody, SwaggerRequestBody("Dados simplificados para atualização", Required = true)] UpdateInvestimentoRequest request)
     {
-        if (id != investimento.Id)
-            return BadRequest("ID mismatch");
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
-        var existing = await _repository.GetByIdAsync(id);
-        if (existing == null)
-            return NotFound();
+        // Validações adicionais
+        if (request.Operacao.ToLower() != "compra" && request.Operacao.ToLower() != "venda")
+        {
+            return BadRequest("Operação deve ser 'compra' ou 'venda'");
+        }
 
-        var updated = await _repository.UpdateAsync(investimento);
-        return Ok(updated);
+        try
+        {
+            // Buscar investimento existente
+            var existing = await _repository.GetByIdAsync(id);
+            if (existing == null)
+                return NotFound("Investimento não encontrado");
+
+            // Atualizar apenas os campos editáveis, preservando os demais
+            existing.Tipo = request.Tipo.Trim();
+            existing.Codigo = request.Codigo.Trim().ToUpper();
+            existing.Valor = request.Valor;
+            existing.Operacao = request.Operacao.Trim().ToLower();
+            
+            // Corrigir DateTimeKind para UTC (problema PostgreSQL)
+            if (existing.CriadoEm.Kind != DateTimeKind.Utc)
+            {
+                existing.CriadoEm = DateTime.SpecifyKind(existing.CriadoEm, DateTimeKind.Utc);
+            }
+            // AlteradoEm será atualizado no repositório com UTC correto
+
+            var updated = await _repository.UpdateAsync(existing);
+            return Ok(updated);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest($"Dados inválidos: {ex.Message}");
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest($"Erro de operação: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"Erro ao atualizar investimento: {ex.Message}");
+        }
     }
 
     /// <summary>
-    /// Remove um investimento
+    /// 🗑️ Remove um investimento permanentemente
     /// </summary>
     /// <param name="id">ID do investimento a ser removido</param>
     /// <returns>Confirmação de remoção</returns>
@@ -150,8 +260,8 @@ public class InvestimentosController : ControllerBase
     /// <response code="404">Investimento não encontrado</response>
     [HttpDelete("{id:guid}")]
     [SwaggerOperation(
-        Summary = "Remove um investimento",
-        Description = "Exclui permanentemente um investimento do sistema"
+        Summary = "🗑️ Deletar investimento",
+        Description = "⚠️ ATENÇÃO: Exclui permanentemente um investimento do sistema. Ação irreversível!"
     )]
     [SwaggerResponse(204, "Investimento removido com sucesso")]
     [SwaggerResponse(404, "Investimento não encontrado")]
@@ -169,92 +279,92 @@ public class InvestimentosController : ControllerBase
     // Pesquisas com LINQ (10%)
     
     /// <summary>
-    /// Filtra investimentos por tipo
+    /// 📊 Filtra investimentos por tipo
     /// </summary>
     /// <param name="tipo">Tipo de investimento (ex: Ação, CDB, Tesouro)</param>
-    /// <returns>Lista de investimentos do tipo especificado</returns>
-    /// <response code="200">Lista de investimentos filtrada por tipo</response>
+    /// <returns>Todos os investimentos do tipo escolhido</returns>
+    /// <response code="200">Lista filtrada por tipo</response>
     [HttpGet("tipo/{tipo}")]
     [SwaggerOperation(
-        Summary = "Filtra investimentos por tipo",
-        Description = "Retorna todos os investimentos de um tipo específico usando consulta LINQ otimizada"
+        Summary = "📊 Buscar por TIPO de investimento",
+        Description = "Digite um tipo (Ação, CDB, Tesouro, etc.) para ver todos os investimentos desse tipo. Exemplo: 'Ação' mostra todas as ações"
     )]
     [SwaggerResponse(200, "Investimentos filtrados por tipo", typeof(IEnumerable<Investimento>))]
     public async Task<ActionResult<IEnumerable<Investimento>>> GetByTipo(
-        [FromRoute, SwaggerParameter("Tipo de investimento (Ação, CDB, Tesouro, etc.)", Required = true)] string tipo)
+        [FromRoute, SwaggerParameter("Tipo: Ação, CDB, Tesouro, etc.", Required = true)] string tipo)
     {
         var investimentos = await _repository.GetByTipoAsync(tipo);
         return Ok(investimentos);
     }
 
     /// <summary>
-    /// Filtra investimentos por operação
+    /// 💰 Filtra por COMPRAS ou VENDAS
     /// </summary>
     /// <param name="operacao">Tipo de operação (compra ou venda)</param>
-    /// <returns>Lista de investimentos da operação especificada</returns>
-    /// <response code="200">Lista de investimentos filtrada por operação</response>
+    /// <returns>Todas as compras OU todas as vendas</returns>
+    /// <response code="200">Lista filtrada por operação</response>
     [HttpGet("operacao/{operacao}")]
     [SwaggerOperation(
-        Summary = "Filtra investimentos por operação",
-        Description = "Retorna todos os investimentos de uma operação específica (compra/venda) usando LINQ"
+        Summary = "💰 Ver só COMPRAS ou só VENDAS",
+        Description = "Digite 'compra' para ver todas as compras ou 'venda' para ver todas as vendas realizadas"
     )]
     [SwaggerResponse(200, "Investimentos filtrados por operação", typeof(IEnumerable<Investimento>))]
     public async Task<ActionResult<IEnumerable<Investimento>>> GetByOperacao(
-        [FromRoute, SwaggerParameter("Tipo de operação: 'compra' ou 'venda'", Required = true)] string operacao)
+        [FromRoute, SwaggerParameter("Digite: 'compra' ou 'venda'", Required = true)] string operacao)
     {
         var investimentos = await _repository.GetByOperacaoAsync(operacao);
         return Ok(investimentos);
     }
 
     /// <summary>
-    /// Calcula o valor total investido por um usuário
+    /// 💵 Quanto uma pessoa tem investido (saldo líquido)
     /// </summary>
     /// <param name="userCpf">CPF do usuário</param>
-    /// <returns>Valor total considerando compras (+) e vendas (-)</returns>
-    /// <response code="200">Valor total calculado</response>
-    [HttpGet("total-valor/{userCpf}")]
+    /// <returns>Valor líquido: compras menos vendas</returns>
+    /// <response code="200">Saldo calculado</response>
+    [HttpGet("saldo/{userCpf}")]
     [SwaggerOperation(
-        Summary = "Calcula valor total por usuário",
-        Description = "Usa LINQ para somar valores de compras e subtrair vendas, retornando o valor líquido investido"
+        Summary = "💵 SALDO de uma pessoa",
+        Description = "Calcula automaticamente: COMPRAS (+) menos VENDAS (-) = saldo líquido investido. Digite o CPF para ver quanto a pessoa realmente tem aplicado!"
     )]
-    [SwaggerResponse(200, "Valor total calculado", typeof(object))]
+    [SwaggerResponse(200, "Saldo líquido calculado", typeof(object))]
     public async Task<ActionResult<decimal>> GetTotalValueByUser(
-        [FromRoute, SwaggerParameter("CPF do usuário", Required = true)] string userCpf)
+        [FromRoute, SwaggerParameter("CPF apenas números", Required = true)] string userCpf)
     {
         var total = await _repository.GetTotalValueByUserAsync(userCpf);
-        return Ok(new { UserCpf = userCpf, ValorTotal = total });
+        return Ok(new { UserCpf = userCpf, SaldoLiquido = total, Explicacao = "Compras (+) menos Vendas (-)" });
     }
 
     /// <summary>
-    /// Obtém investimentos recentes
+    /// ⏰ Investimentos mais recentes
     /// </summary>
-    /// <param name="days">Número de dias para considerar como recente (padrão: 30)</param>
-    /// <returns>Lista de investimentos dos últimos N dias</returns>
+    /// <param name="days">Últimos quantos dias? (padrão: 30 dias)</param>
+    /// <returns>Investimentos dos últimos N dias</returns>
     /// <response code="200">Investimentos recentes</response>
     [HttpGet("recentes")]
     [SwaggerOperation(
-        Summary = "Lista investimentos recentes",
-        Description = "Retorna investimentos criados nos últimos N dias usando consulta LINQ com filtro de data"
+        Summary = "⏰ Ver investimentos RECENTES",
+        Description = "Mostra os investimentos mais novos! Deixe em branco para ver os últimos 30 dias, ou digite um número diferente (ex: 7 para última semana)"
     )]
     [SwaggerResponse(200, "Lista de investimentos recentes", typeof(IEnumerable<Investimento>))]
     public async Task<ActionResult<IEnumerable<Investimento>>> GetRecentInvestments(
-        [FromQuery, SwaggerParameter("Número de dias (padrão: 30)")] int days = 30)
+        [FromQuery, SwaggerParameter("Últimos quantos dias? (padrão: 30)")] int days = 30)
     {
         var investimentos = await _repository.GetRecentInvestmentsAsync(days);
         return Ok(investimentos);
     }
 
     /// <summary>
-    /// Obtém resumo de investimentos agrupados por tipo
+    /// 📈 Dashboard: estatísticas por tipo de investimento
     /// </summary>
-    /// <returns>Estatísticas agrupadas por tipo de investimento</returns>
-    /// <response code="200">Resumo estatístico por tipo</response>
-    [HttpGet("resumo-por-tipo")]
+    /// <returns>Resumo completo: quantos e quanto por tipo</returns>
+    /// <response code="200">Dashboard resumo</response>
+    [HttpGet("dashboard")]
     [SwaggerOperation(
-        Summary = "Resumo estatístico por tipo",
-        Description = "Usa LINQ GroupBy para agregar dados: total de investimentos, valor total e valor médio por tipo"
+        Summary = "📈 DASHBOARD - Resumo geral",
+        Description = "Veja o resumo completo: quantos investimentos existem de cada tipo (Ação, CDB, etc.) e o valor total de cada categoria. Perfeito para ter uma visão panorâmica!"
     )]
-    [SwaggerResponse(200, "Resumo estatístico agrupado", typeof(IEnumerable<object>))]
+    [SwaggerResponse(200, "Dashboard com estatísticas por tipo", typeof(IEnumerable<object>))]
     public async Task<ActionResult<IEnumerable<object>>> GetInvestmentSummaryByType()
     {
         var summary = await _repository.GetInvestmentSummaryByTypeAsync();
@@ -262,14 +372,14 @@ public class InvestimentosController : ControllerBase
     }
 
     /// <summary>
-    /// Lista todos os CPFs únicos presentes na base de dados
+    /// 👥 Lista de todos os CPFs que têm investimentos
     /// </summary>
-    /// <returns>Lista de CPFs únicos ordenados</returns>
-    /// <response code="200">Lista de CPFs únicos</response>
-    [HttpGet("usuarios/cpfs")]
+    /// <returns>Todos os CPFs únicos da base</returns>
+    /// <response code="200">Lista de CPFs</response>
+    [HttpGet("usuarios")]
     [SwaggerOperation(
-        Summary = "Lista todos os CPFs cadastrados",
-        Description = "Usa LINQ Distinct para retornar todos os CPFs únicos presentes na base de dados, ordenados alfabeticamente"
+        Summary = "👥 Lista de PESSOAS que investem",
+        Description = "Mostra todos os CPFs únicos que têm pelo menos um investimento cadastrado. Útil para saber quem são os investidores!"
     )]
     [SwaggerResponse(200, "Lista de CPFs únicos", typeof(IEnumerable<string>))]
     public async Task<ActionResult<IEnumerable<string>>> GetAllUserCpfs()
