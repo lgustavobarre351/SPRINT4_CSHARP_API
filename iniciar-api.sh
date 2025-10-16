@@ -37,15 +37,18 @@ if [ $? -ne 0 ]; then
 fi
 
 echo
-echo -e "${GREEN}🚀 Iniciando API...${NC}"
+echo -e "${GREEN}🚀 Iniciando API (Banco Supabase já configurado)...${NC}"
 echo
 echo -e "${BLUE}"
 echo "  ╔══════════════════════════════════════════════╗"
 echo "  ║  📋 Swagger: http://localhost:5171/swagger   ║"
 echo "  ║  🌐 API:     http://localhost:5171/api       ║"
+echo "  ║  🗄️ Banco:    Supabase (conectado auto)      ║"
+echo "  ║  🔍 LINQ:     Identificado no Swagger        ║"
 echo "  ║  ❌ Para parar: Ctrl+C                       ║"
 echo "  ╚══════════════════════════════════════════════╝"
 echo -e "${NC}"
+echo -e "${YELLOW}💡 PLUG AND PLAY: Zero configuração necessária!${NC}"
 
 dotnet run
 

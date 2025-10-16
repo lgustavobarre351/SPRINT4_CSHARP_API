@@ -64,14 +64,14 @@ public class InvestimentosController : ControllerBase
     // CRUD completo (35%)
     
     /// <summary>
-    /// 📋 Lista todos os investimentos (mais recentes primeiro)
+    /// 📋 Lista todos os investimentos - mais recentes primeiro (LINQ)
     /// </summary>
     /// <returns>Lista de todos os investimentos ordenados por data</returns>
     /// <response code="200">Lista completa de investimentos</response>
     [HttpGet]
     [SwaggerOperation(
-        Summary = "📋 Lista TODOS os investimentos",
-        Description = "Visualize toda a base de dados de investimentos, ordenados por data (mais recentes primeiro). Ideal para ter uma visão geral completa!"
+        Summary = "📋 Lista TODOS os investimentos [LINQ]",
+        Description = "🔍 CONSULTA LINQ: Usa OrderByDescending() para ordenar por data. Visualize toda a base de dados de investimentos (mais recentes primeiro)."
     )]
     [SwaggerResponse(200, "Lista de investimentos retornada com sucesso", typeof(IEnumerable<Investimento>))]
     public async Task<ActionResult<IEnumerable<Investimento>>> GetAll()
@@ -81,7 +81,7 @@ public class InvestimentosController : ControllerBase
     }
 
     /// <summary>
-    /// 🔍 Busca um investimento específico pelo ID
+    /// 🔍 Busca um investimento específico pelo ID (LINQ)
     /// </summary>
     /// <param name="id">ID único do investimento</param>
     /// <returns>Dados completos do investimento</returns>
@@ -89,8 +89,8 @@ public class InvestimentosController : ControllerBase
     /// <response code="404">Investimento não encontrado</response>
     [HttpGet("{id:guid}")]
     [SwaggerOperation(
-        Summary = "🔍 Busca investimento por ID",
-        Description = "Cole o ID de qualquer investimento para ver todos os seus detalhes completos"
+        Summary = "🔍 Busca investimento por ID [LINQ]",
+        Description = "🔍 CONSULTA LINQ: Usa FirstOrDefaultAsync() para buscar por ID específico. Cole o ID de qualquer investimento para ver detalhes completos."
     )]
     [SwaggerResponse(200, "Investimento encontrado", typeof(Investimento))]
     [SwaggerResponse(404, "Investimento não encontrado")]
@@ -105,15 +105,15 @@ public class InvestimentosController : ControllerBase
     }
 
     /// <summary>
-    /// 👤 Lista todos os investimentos de um usuário
+    /// 👤 Lista todos os investimentos de um usuário (LINQ)
     /// </summary>
     /// <param name="userCpf">CPF do usuário (apenas números, 11 dígitos)</param>
     /// <returns>Todos os investimentos do usuário</returns>
     /// <response code="200">Lista de investimentos do usuário</response>
     [HttpGet("usuario/{userCpf}")]
     [SwaggerOperation(
-        Summary = "👤 Meus investimentos por CPF",
-        Description = "Digite apenas os NÚMEROS do CPF (sem pontos ou traços) para ver todos os investimentos dessa pessoa. Exemplo: 12345678901"
+        Summary = "👤 Meus investimentos por CPF [LINQ]",
+        Description = "🔍 CONSULTA LINQ: Usa Where() + OrderByDescending() para filtrar por CPF. Digite apenas os NÚMEROS do CPF para ver todos os investimentos da pessoa."
     )]
     [SwaggerResponse(200, "Lista de investimentos do usuário", typeof(IEnumerable<Investimento>))]
     public async Task<ActionResult<IEnumerable<Investimento>>> GetByUserCpf(
@@ -279,15 +279,15 @@ public class InvestimentosController : ControllerBase
     // Pesquisas com LINQ (10%)
     
     /// <summary>
-    /// 📊 Filtra investimentos por tipo
+    /// 📊 Filtra investimentos por tipo (LINQ)
     /// </summary>
     /// <param name="tipo">Tipo de investimento (ex: Ação, CDB, Tesouro)</param>
     /// <returns>Todos os investimentos do tipo escolhido</returns>
     /// <response code="200">Lista filtrada por tipo</response>
     [HttpGet("tipo/{tipo}")]
     [SwaggerOperation(
-        Summary = "📊 Buscar por TIPO de investimento",
-        Description = "Digite um tipo (Ação, CDB, Tesouro, etc.) para ver todos os investimentos desse tipo. Exemplo: 'Ação' mostra todas as ações"
+        Summary = "📊 Buscar por TIPO de investimento [LINQ]",
+        Description = "🔍 CONSULTA LINQ: Usa Where() + OrderByDescending() para filtrar investimentos por tipo. Digite um tipo (Ação, CDB, Tesouro, etc.) para ver todos os investimentos desse tipo."
     )]
     [SwaggerResponse(200, "Investimentos filtrados por tipo", typeof(IEnumerable<Investimento>))]
     public async Task<ActionResult<IEnumerable<Investimento>>> GetByTipo(
@@ -298,15 +298,15 @@ public class InvestimentosController : ControllerBase
     }
 
     /// <summary>
-    /// 💰 Filtra por COMPRAS ou VENDAS
+    /// 💰 Filtra por COMPRAS ou VENDAS (LINQ)
     /// </summary>
     /// <param name="operacao">Tipo de operação (compra ou venda)</param>
     /// <returns>Todas as compras OU todas as vendas</returns>
     /// <response code="200">Lista filtrada por operação</response>
     [HttpGet("operacao/{operacao}")]
     [SwaggerOperation(
-        Summary = "💰 Ver só COMPRAS ou só VENDAS",
-        Description = "Digite 'compra' para ver todas as compras ou 'venda' para ver todas as vendas realizadas"
+        Summary = "💰 Ver só COMPRAS ou só VENDAS [LINQ]",
+        Description = "🔍 CONSULTA LINQ: Usa Where() + OrderByDescending() para filtrar por operação. Digite 'compra' para ver todas as compras ou 'venda' para ver todas as vendas."
     )]
     [SwaggerResponse(200, "Investimentos filtrados por operação", typeof(IEnumerable<Investimento>))]
     public async Task<ActionResult<IEnumerable<Investimento>>> GetByOperacao(
@@ -317,15 +317,15 @@ public class InvestimentosController : ControllerBase
     }
 
     /// <summary>
-    /// 💵 Quanto uma pessoa tem investido (saldo líquido)
+    /// 💵 Quanto uma pessoa tem investido - saldo líquido (LINQ)
     /// </summary>
     /// <param name="userCpf">CPF do usuário</param>
     /// <returns>Valor líquido: compras menos vendas</returns>
     /// <response code="200">Saldo calculado</response>
     [HttpGet("saldo/{userCpf}")]
     [SwaggerOperation(
-        Summary = "💵 SALDO de uma pessoa",
-        Description = "Calcula automaticamente: COMPRAS (+) menos VENDAS (-) = saldo líquido investido. Digite o CPF para ver quanto a pessoa realmente tem aplicado!"
+        Summary = "💵 SALDO de uma pessoa [LINQ]",
+        Description = "🔍 CONSULTA LINQ: Usa Join() + Where() + Select() + SumAsync() para calcular saldo líquido. COMPRAS (+) menos VENDAS (-) = saldo total investido."
     )]
     [SwaggerResponse(200, "Saldo líquido calculado", typeof(object))]
     public async Task<ActionResult<decimal>> GetTotalValueByUser(
@@ -336,15 +336,15 @@ public class InvestimentosController : ControllerBase
     }
 
     /// <summary>
-    /// ⏰ Investimentos mais recentes
+    /// ⏰ Investimentos mais recentes (LINQ)
     /// </summary>
     /// <param name="days">Últimos quantos dias? (padrão: 30 dias)</param>
     /// <returns>Investimentos dos últimos N dias</returns>
     /// <response code="200">Investimentos recentes</response>
     [HttpGet("recentes")]
     [SwaggerOperation(
-        Summary = "⏰ Ver investimentos RECENTES",
-        Description = "Mostra os investimentos mais novos! Deixe em branco para ver os últimos 30 dias, ou digite um número diferente (ex: 7 para última semana)"
+        Summary = "⏰ Ver investimentos RECENTES [LINQ]",
+        Description = "🔍 CONSULTA LINQ: Usa Where() + OrderByDescending() para filtrar por data. Mostra investimentos dos últimos N dias (padrão: 30 dias)."
     )]
     [SwaggerResponse(200, "Lista de investimentos recentes", typeof(IEnumerable<Investimento>))]
     public async Task<ActionResult<IEnumerable<Investimento>>> GetRecentInvestments(
@@ -355,14 +355,14 @@ public class InvestimentosController : ControllerBase
     }
 
     /// <summary>
-    /// 📈 Dashboard: estatísticas por tipo de investimento
+    /// 📈 Dashboard: estatísticas por tipo de investimento (LINQ)
     /// </summary>
     /// <returns>Resumo completo: quantos e quanto por tipo</returns>
     /// <response code="200">Dashboard resumo</response>
     [HttpGet("dashboard")]
     [SwaggerOperation(
-        Summary = "📈 DASHBOARD - Resumo geral",
-        Description = "Veja o resumo completo: quantos investimentos existem de cada tipo (Ação, CDB, etc.) e o valor total de cada categoria. Perfeito para ter uma visão panorâmica!"
+        Summary = "📈 DASHBOARD - Resumo geral [LINQ]",
+        Description = "🔍 CONSULTA LINQ: Usa GroupBy() + Select() + Count() + Sum() + Average() para estatísticas por tipo. Veja resumo completo de cada categoria de investimento."
     )]
     [SwaggerResponse(200, "Dashboard com estatísticas por tipo", typeof(IEnumerable<object>))]
     public async Task<ActionResult<IEnumerable<object>>> GetInvestmentSummaryByType()
@@ -372,14 +372,14 @@ public class InvestimentosController : ControllerBase
     }
 
     /// <summary>
-    /// 👥 Lista de todos os CPFs que têm investimentos
+    /// 👥 Lista de todos os CPFs que têm investimentos (LINQ)
     /// </summary>
     /// <returns>Todos os CPFs únicos da base</returns>
     /// <response code="200">Lista de CPFs</response>
     [HttpGet("usuarios")]
     [SwaggerOperation(
-        Summary = "👥 Lista de PESSOAS que investem",
-        Description = "Mostra todos os CPFs únicos que têm pelo menos um investimento cadastrado. Útil para saber quem são os investidores!"
+        Summary = "👥 Lista de PESSOAS que investem [LINQ]",
+        Description = "🔍 CONSULTA LINQ: Usa Join() + Select() + Distinct() + OrderBy() para listar CPFs únicos. Mostra todos os CPFs que têm investimentos."
     )]
     [SwaggerResponse(200, "Lista de CPFs únicos", typeof(IEnumerable<string>))]
     public async Task<ActionResult<IEnumerable<string>>> GetAllUserCpfs()

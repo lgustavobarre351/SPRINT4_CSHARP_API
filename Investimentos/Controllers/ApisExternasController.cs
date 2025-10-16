@@ -24,13 +24,13 @@ public class ApisExternasController : ControllerBase
     }
 
     /// <summary>
-    /// Lista códigos de ações da B3
+    /// Lista códigos de ações da B3 (LINQ)
     /// </summary>
     /// <returns>Lista de códigos B3</returns>
     [HttpGet("codigos-b3")]
     [SwaggerOperation(
-        Summary = "Lista códigos de ações da B3",
-        Description = "Retorna todos os códigos de ações da B3 carregados do arquivo CSV"
+        Summary = "Lista códigos de ações da B3 [LINQ]",
+        Description = "🔍 CONSULTA LINQ: Usa Count() + Take() para contagem e paginação. Retorna todos os códigos de ações da B3 carregados do arquivo CSV"
     )]
     [SwaggerResponse(200, "Lista de códigos da B3", typeof(object))]
     public async Task<ActionResult<object>> GetB3Codes()
@@ -44,8 +44,8 @@ public class ApisExternasController : ControllerBase
                 Message = "Códigos B3 carregados com sucesso",
                 Data = new
                 {
-                    TotalCodes = codes.Count(),
-                    Codes = codes.Take(50), // Primeiros 50 para exemplo
+                    TotalCodes = codes.Count(), // LINQ: Count para total de códigos
+                    Codes = codes.Take(50), // LINQ: Take para limitar a 50 registros
                     AllCodes = codes
                 }
             });
@@ -62,13 +62,13 @@ public class ApisExternasController : ControllerBase
     }
 
     /// <summary>
-    /// Recarrega códigos da B3
+    /// Recarrega códigos da B3 (LINQ)
     /// </summary>
     /// <returns>Status da operação</returns>
     [HttpPost("recarregar-b3")]
     [SwaggerOperation(
-        Summary = "Recarrega códigos da B3",
-        Description = "Força o recarregamento da lista de códigos da B3"
+        Summary = "Recarrega códigos da B3 [LINQ]",
+        Description = "🔍 CONSULTA LINQ: Usa Count() para contagem após recarregamento. Força o recarregamento da lista de códigos da B3"
     )]
     public async Task<ActionResult<object>> ReloadB3Codes()
     {
@@ -81,7 +81,7 @@ public class ApisExternasController : ControllerBase
             {
                 Success = true,
                 Message = "Códigos B3 recarregados com sucesso",
-                TotalCodes = codes.Count()
+                TotalCodes = codes.Count() // LINQ: Count para total de códigos recarregados
             });
         }
         catch (Exception ex)

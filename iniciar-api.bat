@@ -30,14 +30,17 @@ if errorlevel 1 (
 )
 
 echo.
-echo 🚀 Iniciando API...
+echo 🚀 Iniciando API (Banco Supabase já configurado)...
 echo.
 echo  ╔══════════════════════════════════════════════╗
 echo  ║  📋 Swagger: http://localhost:5171/swagger   ║
 echo  ║  🌐 API:     http://localhost:5171/api       ║
+echo  ║  🗄️ Banco:    Supabase (conectado auto)      ║
+echo  ║  🔍 LINQ:     Identificado no Swagger        ║
 echo  ║  ❌ Para parar: Ctrl+C                       ║
 echo  ╚══════════════════════════════════════════════╝
 echo.
+echo 💡 PLUG AND PLAY: Zero configuração necessária!
 
 call dotnet run
 

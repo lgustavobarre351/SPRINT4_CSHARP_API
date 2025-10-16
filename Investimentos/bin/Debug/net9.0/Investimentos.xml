@@ -11,13 +11,13 @@
         </member>
         <member name="M:ProjetoInvestimentos.Controllers.ApisExternasController.GetB3Codes">
             <summary>
-            Lista códigos de ações da B3
+            Lista códigos de ações da B3 (LINQ)
             </summary>
             <returns>Lista de códigos B3</returns>
         </member>
         <member name="M:ProjetoInvestimentos.Controllers.ApisExternasController.ReloadB3Codes">
             <summary>
-            Recarrega códigos da B3
+            Recarrega códigos da B3 (LINQ)
             </summary>
             <returns>Status da operação</returns>
         </member>
@@ -56,14 +56,14 @@
         </member>
         <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetAll">
             <summary>
-            📋 Lista todos os investimentos (mais recentes primeiro)
+            📋 Lista todos os investimentos - mais recentes primeiro (LINQ)
             </summary>
             <returns>Lista de todos os investimentos ordenados por data</returns>
             <response code="200">Lista completa de investimentos</response>
         </member>
         <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetById(System.Guid)">
             <summary>
-            🔍 Busca um investimento específico pelo ID
+            🔍 Busca um investimento específico pelo ID (LINQ)
             </summary>
             <param name="id">ID único do investimento</param>
             <returns>Dados completos do investimento</returns>
@@ -72,7 +72,7 @@
         </member>
         <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetByUserCpf(System.String)">
             <summary>
-            👤 Lista todos os investimentos de um usuário
+            👤 Lista todos os investimentos de um usuário (LINQ)
             </summary>
             <param name="userCpf">CPF do usuário (apenas números, 11 dígitos)</param>
             <returns>Todos os investimentos do usuário</returns>
@@ -109,7 +109,7 @@
         </member>
         <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetByTipo(System.String)">
             <summary>
-            📊 Filtra investimentos por tipo
+            📊 Filtra investimentos por tipo (LINQ)
             </summary>
             <param name="tipo">Tipo de investimento (ex: Ação, CDB, Tesouro)</param>
             <returns>Todos os investimentos do tipo escolhido</returns>
@@ -117,7 +117,7 @@
         </member>
         <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetByOperacao(System.String)">
             <summary>
-            💰 Filtra por COMPRAS ou VENDAS
+            💰 Filtra por COMPRAS ou VENDAS (LINQ)
             </summary>
             <param name="operacao">Tipo de operação (compra ou venda)</param>
             <returns>Todas as compras OU todas as vendas</returns>
@@ -125,7 +125,7 @@
         </member>
         <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetTotalValueByUser(System.String)">
             <summary>
-            💵 Quanto uma pessoa tem investido (saldo líquido)
+            💵 Quanto uma pessoa tem investido - saldo líquido (LINQ)
             </summary>
             <param name="userCpf">CPF do usuário</param>
             <returns>Valor líquido: compras menos vendas</returns>
@@ -133,7 +133,7 @@
         </member>
         <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetRecentInvestments(System.Int32)">
             <summary>
-            ⏰ Investimentos mais recentes
+            ⏰ Investimentos mais recentes (LINQ)
             </summary>
             <param name="days">Últimos quantos dias? (padrão: 30 dias)</param>
             <returns>Investimentos dos últimos N dias</returns>
@@ -141,14 +141,14 @@
         </member>
         <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetInvestmentSummaryByType">
             <summary>
-            📈 Dashboard: estatísticas por tipo de investimento
+            📈 Dashboard: estatísticas por tipo de investimento (LINQ)
             </summary>
             <returns>Resumo completo: quantos e quanto por tipo</returns>
             <response code="200">Dashboard resumo</response>
         </member>
         <member name="M:ProjetoInvestimentos.Controllers.InvestimentosController.GetAllUserCpfs">
             <summary>
-            👥 Lista de todos os CPFs que têm investimentos
+            👥 Lista de todos os CPFs que têm investimentos (LINQ)
             </summary>
             <returns>Todos os CPFs únicos da base</returns>
             <response code="200">Lista de CPFs</response>
@@ -171,14 +171,14 @@
         </member>
         <member name="M:ProjetoInvestimentos.Controllers.UsuariosController.GetAll">
             <summary>
-            👥 Lista todos os usuários cadastrados
+            👥 Lista todos os usuários cadastrados (LINQ)
             </summary>
             <returns>Lista de usuários com nomes extraídos do JSON</returns>
             <response code="200">Lista de usuários retornada com sucesso</response>
         </member>
         <member name="M:ProjetoInvestimentos.Controllers.UsuariosController.GetByCpf(System.String)">
             <summary>
-            🔍 Busca um usuário pelo CPF
+            🔍 Busca um usuário pelo CPF (LINQ)
             </summary>
             <param name="cpf">CPF do usuário (apenas números, 11 dígitos)</param>
             <returns>Dados do usuário com nome extraído do JSON</returns>
@@ -214,7 +214,7 @@
         </member>
         <member name="M:ProjetoInvestimentos.Controllers.UsuariosController.Delete(System.String)">
             <summary>
-            🗑️ Remove um usuário
+            🗑️ Remove um usuário (LINQ)
             </summary>
             <param name="cpf">CPF do usuário a ser removido</param>
             <returns>Confirmação de remoção</returns>

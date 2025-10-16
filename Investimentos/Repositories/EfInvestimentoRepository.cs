@@ -41,6 +41,7 @@ public class EfInvestimentoRepository : IInvestimentoRepository
 
     public async Task<IEnumerable<Investimento>> GetAllAsync()
     {
+        // LINQ: Consulta para obter todos os investimentos ordenados por data de criação
         return await _context.Investimentos
             .OrderByDescending(i => i.CriadoEm)
             .ToListAsync();
@@ -48,12 +49,14 @@ public class EfInvestimentoRepository : IInvestimentoRepository
 
     public async Task<Investimento?> GetByIdAsync(Guid id)
     {
+        // LINQ: Busca investimento específico por ID
         return await _context.Investimentos
             .FirstOrDefaultAsync(i => i.Id == id);
     }
 
     public async Task<IEnumerable<Investimento>> GetByUserCpfAsync(string userCpf)
     {
+        // LINQ: Filtra investimentos por CPF do usuário e ordena por data
         return await _context.Investimentos
             .Where(i => i.UserCpf == userCpf)
             .OrderByDescending(i => i.CriadoEm)
@@ -74,7 +77,7 @@ public class EfInvestimentoRepository : IInvestimentoRepository
                 throw new ArgumentException("CPF do usuário é obrigatório");
             }
 
-            // Buscar ou criar o usuário
+            // LINQ: Buscar ou criar o usuário
             var user = await _context.UserProfiles
                 .FirstOrDefaultAsync(u => u.Cpf == investimento.UserCpf);
             
@@ -142,7 +145,7 @@ public class EfInvestimentoRepository : IInvestimentoRepository
     {
         try
         {
-            // Desanexar qualquer entidade que possa estar sendo rastreada
+            // LINQ: Desanexar qualquer entidade que possa estar sendo rastreada
             var tracked = _context.ChangeTracker.Entries<Investimento>()
                 .FirstOrDefault(e => e.Entity.Id == investimento.Id);
             if (tracked != null)
@@ -190,6 +193,7 @@ public class EfInvestimentoRepository : IInvestimentoRepository
     // LINQ Queries (peso 10%)
     public async Task<IEnumerable<Investimento>> GetByTipoAsync(string tipo)
     {
+        // LINQ: Filtro por tipo de investimento com busca case-insensitive
         return await _context.Investimentos
             .Where(i => i.Tipo.ToLower() == tipo.ToLower())
             .OrderByDescending(i => i.CriadoEm)
@@ -198,6 +202,7 @@ public class EfInvestimentoRepository : IInvestimentoRepository
 
     public async Task<IEnumerable<Investimento>> GetByOperacaoAsync(string operacao)
     {
+        // LINQ: Filtro por tipo de operação (compra/venda) com busca case-insensitive
         return await _context.Investimentos
             .Where(i => i.Operacao.ToLower() == operacao.ToLower())
             .OrderByDescending(i => i.CriadoEm)
@@ -206,6 +211,7 @@ public class EfInvestimentoRepository : IInvestimentoRepository
 
     public async Task<decimal> GetTotalValueByUserAsync(string userCpf)
     {
+        // LINQ: Join entre tabelas + cálculo de saldo (compras positivas, vendas negativas)
         return await (from i in _context.Investimentos
                       join u in _context.UserProfiles on i.UserId equals u.Id
                       where u.Cpf == userCpf
@@ -216,6 +222,7 @@ public class EfInvestimentoRepository : IInvestimentoRepository
     public async Task<IEnumerable<Investimento>> GetRecentInvestmentsAsync(int days = 30)
     {
         var cutoffDate = DateTime.SpecifyKind(DateTime.UtcNow.AddDays(-days), DateTimeKind.Utc);
+        // LINQ: Filtro por data dos últimos N dias
         return await _context.Investimentos
             .Where(i => i.CriadoEm >= cutoffDate)
             .OrderByDescending(i => i.CriadoEm)
@@ -224,6 +231,7 @@ public class EfInvestimentoRepository : IInvestimentoRepository
 
     public async Task<IEnumerable<object>> GetInvestmentSummaryByTypeAsync()
     {
+        // LINQ: GroupBy + agregações (Count, Sum, Average) para relatório por tipo
         return await _context.Investimentos
             .GroupBy(i => i.Tipo)
             .Select(g => new
@@ -238,6 +246,7 @@ public class EfInvestimentoRepository : IInvestimentoRepository
 
     public async Task<IEnumerable<string>> GetAllUserCpfsAsync()
     {
+        // LINQ: Join + Distinct + OrderBy para listar CPFs únicos
         return await (from i in _context.Investimentos
                       join u in _context.UserProfiles on i.UserId equals u.Id
                       select u.Cpf)

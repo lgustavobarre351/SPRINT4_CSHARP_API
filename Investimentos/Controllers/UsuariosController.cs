@@ -64,18 +64,19 @@ public class UsuariosController : ControllerBase
     }
 
     /// <summary>
-    /// 👥 Lista todos os usuários cadastrados
+    /// 👥 Lista todos os usuários cadastrados (LINQ)
     /// </summary>
     /// <returns>Lista de usuários com nomes extraídos do JSON</returns>
     /// <response code="200">Lista de usuários retornada com sucesso</response>
     [HttpGet]
     [SwaggerOperation(
-        Summary = "👥 Lista TODOS os usuários",
-        Description = "Retorna uma lista completa de todos os usuários cadastrados no sistema, com nomes extraídos automaticamente do campo dados JSON"
+        Summary = "👥 Lista TODOS os usuários [LINQ]",
+        Description = "🔍 CONSULTA LINQ: Usa OrderBy() para ordenar por data de criação. Retorna lista completa de usuários com nomes extraídos do JSON automaticamente"
     )]
     [SwaggerResponse(200, "Lista de usuários retornada com sucesso", typeof(IEnumerable<UserProfile>))]
     public async Task<ActionResult<IEnumerable<UserProfile>>> GetAll()
     {
+        // LINQ: Ordenação por data de criação
         var usuarios = await _context.UserProfiles
             .OrderBy(u => u.CriadoEm)
             .ToListAsync();
@@ -90,7 +91,7 @@ public class UsuariosController : ControllerBase
     }
 
     /// <summary>
-    /// 🔍 Busca um usuário pelo CPF
+    /// 🔍 Busca um usuário pelo CPF (LINQ)
     /// </summary>
     /// <param name="cpf">CPF do usuário (apenas números, 11 dígitos)</param>
     /// <returns>Dados do usuário com nome extraído do JSON</returns>
@@ -98,14 +99,15 @@ public class UsuariosController : ControllerBase
     /// <response code="404">Usuário não encontrado</response>
     [HttpGet("{cpf}")]
     [SwaggerOperation(
-        Summary = "🔍 Buscar usuário por CPF",
-        Description = "Retorna os dados de um usuário específico baseado no seu CPF. Digite apenas os números do CPF, sem pontos ou traços. O nome é extraído automaticamente do campo dados JSON."
+        Summary = "🔍 Buscar usuário por CPF [LINQ]",
+        Description = "🔍 CONSULTA LINQ: Usa FirstOrDefaultAsync() para buscar por CPF específico. Digite apenas números do CPF, sem pontos ou traços."
     )]
     [SwaggerResponse(200, "Usuário encontrado", typeof(UserProfile))]
     [SwaggerResponse(404, "Usuário não encontrado")]
     public async Task<ActionResult<UserProfile>> GetByCpf(
         [FromRoute, SwaggerParameter("CPF do usuário (apenas números, exemplo: 12345678901)", Required = true)] string cpf)
     {
+        // LINQ: Busca usuário por CPF
         var usuario = await _context.UserProfiles
             .FirstOrDefaultAsync(u => u.Cpf == cpf);
         
@@ -249,6 +251,7 @@ public class UsuariosController : ControllerBase
         if (string.IsNullOrWhiteSpace(request.Nome))
             return BadRequest("Nome é obrigatório");
 
+        // LINQ: Busca usuário para atualização
         var usuario = await _context.UserProfiles
             .FirstOrDefaultAsync(u => u.Cpf == cpf);
         
@@ -309,7 +312,7 @@ public class UsuariosController : ControllerBase
     }
 
     /// <summary>
-    /// 🗑️ Remove um usuário
+    /// 🗑️ Remove um usuário (LINQ)
     /// </summary>
     /// <param name="cpf">CPF do usuário a ser removido</param>
     /// <returns>Confirmação de remoção</returns>
@@ -318,8 +321,8 @@ public class UsuariosController : ControllerBase
     /// <response code="400">Usuário possui investimentos e não pode ser removido</response>
     [HttpDelete("{cpf}")]
     [SwaggerOperation(
-        Summary = "🗑️ DELETAR usuário",
-        Description = "⚠️ ATENÇÃO: Exclui permanentemente um usuário do sistema. Só é possível remover usuários que não possuem investimentos. Ação irreversível!"
+        Summary = "🗑️ DELETAR usuário [LINQ]",
+        Description = "🔍 CONSULTA LINQ: Usa FirstOrDefaultAsync() + AnyAsync() para buscar usuário e verificar investimentos. ⚠️ ATENÇÃO: Exclusão permanente!"
     )]
     [SwaggerResponse(204, "Usuário removido com sucesso")]
     [SwaggerResponse(404, "Usuário não encontrado")]
@@ -327,13 +330,14 @@ public class UsuariosController : ControllerBase
     public async Task<ActionResult> Delete(
         [FromRoute, SwaggerParameter("CPF do usuário a ser removido", Required = true)] string cpf)
     {
+        // LINQ: Busca usuário para exclusão
         var usuario = await _context.UserProfiles
             .FirstOrDefaultAsync(u => u.Cpf == cpf);
         
         if (usuario == null)
             return NotFound($"Usuário com CPF {cpf} não encontrado");
 
-        // Verificar se o usuário possui investimentos
+        // LINQ: Verifica se o usuário possui investimentos
         var hasInvestments = await _context.Investimentos
             .AnyAsync(i => i.UserId == usuario.Id);
         
