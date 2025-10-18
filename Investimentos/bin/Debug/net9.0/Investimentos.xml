@@ -11,9 +11,9 @@
         </member>
         <member name="M:ProjetoInvestimentos.Controllers.ApisExternasController.GetB3Codes">
             <summary>
-            Lista códigos de ações da B3 (LINQ)
+            Lista códigos de ações da B3 com cotação disponível (LINQ)
             </summary>
-            <returns>Lista de códigos B3</returns>
+            <returns>Lista de códigos B3 com cotação na API</returns>
         </member>
         <member name="M:ProjetoInvestimentos.Controllers.ApisExternasController.ReloadB3Codes">
             <summary>
